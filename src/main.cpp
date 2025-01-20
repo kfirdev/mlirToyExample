@@ -1,34 +1,17 @@
-//#include "mlir/IR/MLIRContext.h"
-//#include "mlir/IR/Builders.h"
-#include "mlir/IR/BuiltinOps.h"
-#include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "include/ToyLang/Dialect/ToyDialect.h"
+#include "mlir/InitAllDialects.h"
+#include "mlir/Pass/PassManager.h"
+#include "mlir/Pass/PassRegistry.h"
+#include "mlir/Tools/mlir-opt/MlirOptMain.h"
 
+int main(int argc, char **argv) {
+	mlir::DialectRegistry registry;
+	registry.insert<mlir::toylang::toy::ToyDialect>();
+	mlir::registerAllDialects(registry);
+	//mlir::registerAllDialects(registry);
 
-//using namespace std::mlir;
-using namespace mlir;
-
-int main() {
-  // Initialize the MLIR context.
-  MLIRContext context;
-  context.loadDialect<func::FuncDialect>();
-  Builder builder(&context);
-
-  // Create an MLIR module.
-  auto module = ModuleOp::create(builder.getUnknownLoc());
-
-  // Create a function type with no inputs and no outputs.
-  auto funcType = builder.getFunctionType({}, {});
-
-  // Create an MLIR function inside the module.
-  auto func = func::FuncOp::create(builder.getUnknownLoc(), "my_function", funcType);
-  func.setPrivate();
-
-  // Add the function to the module.
-  module.push_back(func);
-
-  // Print the MLIR module.
-  module.print(llvm::outs());
-
-  return 0;
+	//return mlir::asMainReturnCode(
+  	    //mlir::MlirOptMain(argc, argv, "Tutorial Pass Driver", registry));
+	return 0;
 }
 

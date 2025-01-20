@@ -3,8 +3,10 @@ The point of this project is to understand how does mlir works and how can I use
 and maybe some a small parser for a language using these operations so I can perfectrly understand how to use mlir.
 
 ## Plan
-Read mlir tutorials and write some operations to understand how it works.
+The language should be a simple and easy to use begginer friendly lanuage, but behind the scenes using mlir passes
+The language will be optimized to run as fast if not faster than other language, this will be done using heavy optimization passes.
 
- - [toy tutorial](https://mlir.llvm.org/docs/Tutorials/Toy/), [toy tutorial code](https://github.com/llvm/llvm-project/tree/main/mlir/examples/toy)
- 
- - [MLIR for beginners](https://github.com/j2kun/mlir-tutorial/tree/main)
+## TODO
+- [ ] Define the dialect.
+- [ ] Create necessary operations.
+- [ ] Create the passes.
