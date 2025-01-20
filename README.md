@@ -7,6 +7,4 @@ The language should be a simple and easy to use begginer friendly lanuage, but b
 The language will be optimized to run as fast if not faster than other language, this will be done using heavy optimization passes.
 
 ## TODO
-- [ ] Define the dialect.
-- [ ] Create necessary operations.
-- [ ] Create the passes.
+Checkout issue #2
