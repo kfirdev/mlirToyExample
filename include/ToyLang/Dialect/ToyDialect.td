@@ -1,5 +1,5 @@
-//#ifndef TOYLANG_DIALECT_TOYDIALECT
-//#define TOYLANG_DIALECT_TOYDIALECT
+#ifndef TOYLANG_DIALECT_TOYDIALECT
+#define TOYLANG_DIALECT_TOYDIALECT
 
 include "mlir/IR/DialectBase.td"
 
@@ -15,4 +15,4 @@ def ToyDialect : Dialect {
   }];
 }
 
-//#endif
+#endif

@@ -8,10 +8,9 @@ int main(int argc, char **argv) {
 	mlir::DialectRegistry registry;
 	registry.insert<mlir::toylang::toy::ToyDialect>();
 	mlir::registerAllDialects(registry);
-	//mlir::registerAllDialects(registry);
+	mlir::registerAllDialects(registry);
 
-	//return mlir::asMainReturnCode(
-  	    //mlir::MlirOptMain(argc, argv, "Tutorial Pass Driver", registry));
-	return 0;
+	return mlir::asMainReturnCode(
+  	    mlir::MlirOptMain(argc, argv, "Tutorial Pass Driver", registry));
 }
 
