@@ -7,9 +7,7 @@
 int main(int argc, char **argv) {
 	mlir::DialectRegistry registry;
 	registry.insert<mlir::toylang::primitive::PrimitiveDialect>();
-	// register all of the dialects provided by mlir
-	// currently unnecessary
-	//mlir::registerAllDialects(registry);
+	mlir::registerAllDialects(registry);
 
 	return mlir::asMainReturnCode(
   	    mlir::MlirOptMain(argc, argv, "Tutorial Pass Driver", registry));
