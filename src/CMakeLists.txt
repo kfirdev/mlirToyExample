@@ -5,7 +5,8 @@ set (LIBS
     ${dialect_libs}
     ${conversion_libs}
 	MLIROptLib
-	MLIRToy	
+	#MLIRToy	
+	MLIRPrim
 )
 
 add_llvm_executable(toy-opt main.cpp)

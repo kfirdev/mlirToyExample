@@ -1,0 +1,6 @@
+set(LLVM_TARGET_DEFINITIONS PrimitiveTypes.td)
+mlir_tablegen(PrimitiveDialect.h.inc -gen-dialect-decls)
+mlir_tablegen(PrimitiveDialect.cpp.inc -gen-dialect-defs)
+mlir_tablegen(PrimitiveTypes.h.inc -gen-typedef-decls)
+mlir_tablegen(PrimitiveTypes.cpp.inc -gen-typedef-defs)
+add_public_tablegen_target(MLIRPrimDialectIncGen)

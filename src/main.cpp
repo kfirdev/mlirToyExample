@@ -1,4 +1,4 @@
-#include "include/ToyLang/Dialect/ToyDialect.h"
+#include "include/ToyLang/Dialect/PrimitiveDialect/PrimitiveDialect.h"
 #include "mlir/InitAllDialects.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Pass/PassRegistry.h"
@@ -6,9 +6,10 @@
 
 int main(int argc, char **argv) {
 	mlir::DialectRegistry registry;
-	registry.insert<mlir::toylang::toy::ToyDialect>();
-	mlir::registerAllDialects(registry);
-	mlir::registerAllDialects(registry);
+	registry.insert<mlir::toylang::primitive::PrimitiveDialect>();
+	// register all of the dialects provided by mlir
+	// currently unnecessary
+	//mlir::registerAllDialects(registry);
 
 	return mlir::asMainReturnCode(
   	    mlir::MlirOptMain(argc, argv, "Tutorial Pass Driver", registry));
