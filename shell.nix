@@ -14,6 +14,7 @@ pkgs.mkShell {
 	export CC=clang
 	export CXX=clang++
 	export LLVM_BUILD_DIR=$HOME/personal/cpp_projects/llvm_project/llvm-project/build
+	export PATH=$PATH:/home/kfirby/personal/cpp_projects/llvm_project/llvm-project/build/bin
   '';
 
 }
