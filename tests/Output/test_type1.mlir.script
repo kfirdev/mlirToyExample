@@ -1,1 +1,0 @@
-set -o pipefail;set -x;{ { set +x; } 2>/dev/null && echo 'RUN: at line 1': '../build/src/toy-opt /home/kfirby/personal/cpp_projects/mlirToyLang/tests/test_type1.mlir' >&2 && { set -x; } 2>/dev/null && {   ../build/src/toy-opt /home/kfirby/personal/cpp_projects/mlirToyLang/tests/test_type1.mlir; }; }
