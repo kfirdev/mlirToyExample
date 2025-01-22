@@ -7,4 +7,7 @@ mlir_tablegen(PrimitiveTypes.cpp.inc -gen-typedef-defs)
 
 mlir_tablegen(PrimitiveOps.h.inc -gen-op-decls)
 mlir_tablegen(PrimitiveOps.cpp.inc -gen-op-defs)
+
+mlir_tablegen(PrimitiveAttr.h.inc -gen-attrdef-decls)
+mlir_tablegen(PrimitiveAttr.cpp.inc -gen-attrdef-defs)
 add_public_tablegen_target(MLIRPrimDialectIncGen)

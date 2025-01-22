@@ -15,8 +15,9 @@ func.func @test_add_syntax(%arg0: !primitive.int<10>,%arg1: !primitive.int<10>) 
   return %0 : !primitive.int<10>
 }
 //CHECK-LABEL: test_constants
-func.func @test_constants() -> !primitive.int<10> {
-  // CHECK: primitive.constant
-  %0 = primitive.constant 3 : i32 : !primitive.int<10>
-  return %0 : !primitive.int<10>
+func.func @test_constants() -> !primitive.int<4> {
+
+  //CHECK: primitive.constant 
+  %0 = primitive.constant -1 : !primitive.int<4>
+  return %0 : !primitive.int<4>
 }
