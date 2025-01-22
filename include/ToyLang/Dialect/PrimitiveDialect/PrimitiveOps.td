@@ -4,8 +4,9 @@
 include "mlir/IR/OpBase.td"
 include "PrimitiveDialect.td"
 include "PrimitiveTypes.td"
+include "mlir/Interfaces/SideEffectInterfaces.td"
 
-def PrimInt_AddOp : Op<Primitive_Dialect, "add"> {
+def PrimInt_AddOp : Op<Primitive_Dialect, "add", [Pure,SameOperandsAndResultElementType]> {
 	let summary = "Addition operation between to ints";
 	let arguments = (ins Prim_IntegerType:$lhs, Prim_IntegerType:$rhs);
 	let results = (outs Prim_IntegerType:$output);
