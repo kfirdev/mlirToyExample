@@ -64,7 +64,7 @@ mlir::LogicalResult ConstantOp::verify(){
     if (value.getActiveBits() > bitWidth) {
 		std::string valueStr;
         llvm::raw_string_ostream valueStream(valueStr);
-        value.print(valueStream, /*isUnsigned=*/true); // Treat as unsigned for clarity
+        value.print(valueStream, true);
         valueStream.flush();
 
 		 return emitOpError() << "Value (" << valueStr << ") exceeds the allowed bit-width (" 
