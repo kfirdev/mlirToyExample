@@ -19,19 +19,24 @@ def Prim_IntegerAttr : Primitive_Attr<"Integer", "int"> {
     let assemblyFormat = "$value";
 
 	let builders = [
-  	  AttrBuilderWithInferredContext<(ins "Type":$type,
-  	                                      "const APInt &":$value), [{
-  	    return $_get(type.getContext(), type, value);
-  	  }]>
+  	  //AttrBuilderWithInferredContext<(ins "Type":$type,
+  	  //                                    "const APInt &":$value), [{
+	  //  auto integerType = mlir::dyn_cast<IntegerType>(type);
+  	  //  llvm::APInt adjustedValue = value;
+  	  //  if (value.getBitWidth() != integerType.getWidth()) {
+  	  //    adjustedValue = value.zextOrTrunc(integerType.getWidth());
+  	  //  }
+
+  	  //  // Use the generated function to create the attribute.
+  	  //  //return Base::get(type.getContext(), type, adjustedValue);
+
+  	  //  return $_get(type.getContext(), type, adjustedValue);
+  	  //}]>
+	  AttrBuilderWithInferredContext<(ins "Type":$type,"const APInt &":$value)>
   	];
 
     let genVerifyDecl = 1;
 
 	let skipDefaultBuilders = 1;
 }
-
-
-
-
-
 #endif

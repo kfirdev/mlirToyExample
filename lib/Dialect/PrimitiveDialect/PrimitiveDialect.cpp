@@ -2,6 +2,8 @@
 #include "include/ToyLang/Dialect/PrimitiveDialect/PrimitiveAttr.h"
 #include "include/ToyLang/Dialect/PrimitiveDialect/PrimitiveTypes.h"
 #include "include/ToyLang/Dialect/PrimitiveDialect/PrimitiveOps.h"
+#include "mlir/Dialect/CommonFolders.h"
+#include "mlir/IR/PatternMatch.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/Support/LLVM.h"
 #include "llvm/ADT/APInt.h"
@@ -77,11 +79,51 @@ mlir::LogicalResult ConstantOp::verify(){
 
 llvm::LogicalResult IntegerAttr::verify(llvm::function_ref<::mlir::InFlightDiagnostic()> emitError, mlir::Type type, APInt value){
 	
-	if (!mlir::isa<mlir::IntegerType>(type)){
-		return emitError() << "Expected an integer type but got " << type;
-	}
+	//if (!mlir::isa<mlir::IntegerType>(type)){
+	//	return emitError() << "Expected an integer type but got " << type;
+	//}
     return success();
 }
+
+void ConstantOp::build(::mlir::OpBuilder &odsBuilder, ::mlir::OperationState &odsState, Type type,IntegerAttr value){
+  odsState.getOrAddProperties<ConstantOpAdaptor::Properties>().value = value;
+  odsState.addTypes(type);
+}
+
+
+IntegerAttr IntegerAttr::get(Type type, const APInt &value) {
+  auto integerType = mlir::dyn_cast<IntegerType>(type);
+  if (value.getBitWidth() != integerType.getWidth()) {
+    return Base::get(type.getContext(), type, value.zextOrTrunc(integerType.getWidth()));
+  }
+  return Base::get(type.getContext(), type, value);
+
+}
+
+
+mlir::OpFoldResult ConstantOp::fold(ConstantOp::FoldAdaptor adaptor){
+	return adaptor.getValue();
+}
+
+mlir::OpFoldResult AddOp::fold(AddOp::FoldAdaptor adaptor){
+	auto lhs = mlir::cast<IntegerAttr>(adaptor.getLhs()).getValue();
+	auto rhs = mlir::cast<IntegerAttr>(adaptor.getRhs()).getValue();
+	auto result = IntegerAttr::get(getType(),lhs+rhs);
+	return result;
+}
+
+mlir::Operation *PrimitiveDialect::materializeConstant(::mlir::OpBuilder &builder,
+                                         ::mlir::Attribute value,
+                                         ::mlir::Type type,
+                                         ::mlir::Location loc){
+	auto val = mlir::dyn_cast<IntegerAttr>(value);
+
+	if (!val)
+		return nullptr;
+
+	return builder.create<ConstantOp>(loc,type,val);
+}
+
 
 }
 

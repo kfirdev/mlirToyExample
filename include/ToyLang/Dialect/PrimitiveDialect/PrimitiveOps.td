@@ -12,6 +12,9 @@ def PrimInt_AddOp : Op<Primitive_Dialect, "add", [Pure,SameOperandsAndResultElem
 	let arguments = (ins Prim_IntegerType:$lhs, Prim_IntegerType:$rhs);
 	let results = (outs Prim_IntegerType:$output);
 	let assemblyFormat =  "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($output)";
+	let hasFolder = 1;
+	// verify op
+	//let hasVerifier = 1;
 }
 
 def PrimInt_ConstantOp : Op<Primitive_Dialect, "constant", [Pure, ConstantLike]> {
@@ -20,7 +23,14 @@ def PrimInt_ConstantOp : Op<Primitive_Dialect, "constant", [Pure, ConstantLike]>
 	//let arguments = (ins AnyI32Attr:$value);
 	let results = (outs Prim_IntegerType:$output);
 	let assemblyFormat = "$value attr-dict `:` type($output)";
+
+	let builders = [
+		OpBuilder<(ins "Type":$type, "IntegerAttr":$value)>
+	];
+	let skipDefaultBuilders = 1;
+
 	let hasVerifier = 1;
+	let hasFolder = 1;
 }
 
 #endif
