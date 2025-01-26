@@ -75,5 +75,13 @@ mlir::LogicalResult ConstantOp::verify(){
     return success();
 }
 
+llvm::LogicalResult IntegerAttr::verify(llvm::function_ref<::mlir::InFlightDiagnostic()> emitError, mlir::Type type, APInt value){
+	
+	if (!mlir::isa<mlir::IntegerType>(type)){
+		return emitError() << "Expected an integer type but got " << type;
+	}
+    return success();
+}
+
 }
 

@@ -17,7 +17,20 @@ def Prim_IntegerAttr : Primitive_Attr<"Integer", "int"> {
 
 	let parameters = (ins AttributeSelfTypeParameter<"">:$type, "APInt":$value);
     let assemblyFormat = "$value";
+
+	let builders = [
+  	  AttrBuilderWithInferredContext<(ins "Type":$type,
+  	                                      "const APInt &":$value), [{
+  	    return $_get(type.getContext(), type, value);
+  	  }]>
+  	];
+
+    let genVerifyDecl = 1;
+
+	let skipDefaultBuilders = 1;
 }
+
+
 
 
 
