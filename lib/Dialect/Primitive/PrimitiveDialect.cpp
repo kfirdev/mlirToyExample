@@ -1,7 +1,8 @@
-#include "include/ToyLang/Dialect/PrimitiveDialect/PrimitiveDialect.h"
-#include "include/ToyLang/Dialect/PrimitiveDialect/PrimitiveAttr.h"
-#include "include/ToyLang/Dialect/PrimitiveDialect/PrimitiveTypes.h"
-#include "include/ToyLang/Dialect/PrimitiveDialect/PrimitiveOps.h"
+#include "include/ToyLang/Dialect/Primitive/PrimitiveDialect.h"
+#include "include/ToyLang/Dialect/Primitive/PrimitiveAttr.h"
+#include "include/ToyLang/Dialect/Primitive/PrimitiveTypes.h"
+#include "include/ToyLang/Dialect/Primitive/PrimitiveOps.h"
+#include "mlir/Pass/Pass.h"
 #include "mlir/Dialect/CommonFolders.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/IR/Builders.h"
@@ -24,15 +25,15 @@ struct FieldParser<llvm::APInt> {
 
 }
 
-#include "ToyLang/Dialect/PrimitiveDialect/PrimitiveDialect.cpp.inc"
+#include "ToyLang/Dialect/Primitive/PrimitiveDialect.cpp.inc"
 #define GET_TYPEDEF_CLASSES
-#include "ToyLang/Dialect/PrimitiveDialect/PrimitiveTypes.cpp.inc"
+#include "ToyLang/Dialect/Primitive/PrimitiveTypes.cpp.inc"
 
 #define GET_ATTRDEF_CLASSES
-#include "ToyLang/Dialect/PrimitiveDialect/PrimitiveAttr.cpp.inc"
+#include "ToyLang/Dialect/Primitive/PrimitiveAttr.cpp.inc"
 
 #define GET_OP_CLASSES
-#include "ToyLang/Dialect/PrimitiveDialect/PrimitiveOps.cpp.inc"
+#include "ToyLang/Dialect/Primitive/PrimitiveOps.cpp.inc"
 
 
 namespace mlir::toylang::primitive{
@@ -40,18 +41,19 @@ namespace mlir::toylang::primitive{
 void PrimitiveDialect::initialize(){
 	addTypes<
 #define GET_TYPEDEF_LIST 
-#include "ToyLang/Dialect/PrimitiveDialect/PrimitiveTypes.cpp.inc"
+#include "ToyLang/Dialect/Primitive/PrimitiveTypes.cpp.inc"
 		>();
 
 	addOperations<
 	#define GET_OP_LIST
-	#include "ToyLang/Dialect/PrimitiveDialect/PrimitiveOps.cpp.inc"
+	#include "ToyLang/Dialect/Primitive/PrimitiveOps.cpp.inc"
 		>();
 
 	addAttributes<
 		#define GET_ATTRDEF_LIST
-		#include "ToyLang/Dialect/PrimitiveDialect/PrimitiveAttr.cpp.inc"
+		#include "ToyLang/Dialect/Primitive/PrimitiveAttr.cpp.inc"
 		>();
+
 }
 
 mlir::LogicalResult ConstantOp::verify(){
@@ -86,6 +88,7 @@ llvm::LogicalResult IntegerAttr::verify(llvm::function_ref<::mlir::InFlightDiagn
 }
 
 void ConstantOp::build(::mlir::OpBuilder &odsBuilder, ::mlir::OperationState &odsState, Type type,IntegerAttr value){
+  //auto val = IntegerAttr::get(type,value.getValue());
   odsState.getOrAddProperties<ConstantOpAdaptor::Properties>().value = value;
   odsState.addTypes(type);
 }
@@ -123,7 +126,6 @@ mlir::Operation *PrimitiveDialect::materializeConstant(::mlir::OpBuilder &builde
 
 	return builder.create<ConstantOp>(loc,type,val);
 }
-
 
 }
 

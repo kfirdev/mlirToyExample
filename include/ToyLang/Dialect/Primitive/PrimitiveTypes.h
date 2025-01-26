@@ -3,5 +3,5 @@
 #include "mlir/IR/DialectImplementation.h"
 
 #define GET_TYPEDEF_CLASSES 
-#include "ToyLang/Dialect/PrimitiveDialect/PrimitiveTypes.h.inc"
+#include "ToyLang/Dialect/Primitive/PrimitiveTypes.h.inc"
 

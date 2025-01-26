@@ -3,6 +3,7 @@ add_mlir_dialect_library(MLIRPrim
 
 	DEPENDS
 	MLIRPrimDialectIncGen
+	#MLIRPrinPassIncGen
 	#MLIRPrimDialectTypesIncGen
 
     )

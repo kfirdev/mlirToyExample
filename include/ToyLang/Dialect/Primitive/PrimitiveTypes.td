@@ -14,6 +14,11 @@ def Prim_IntegerType : Prim_Type<"Integer","int"> {
 		Integer types with a given precision.
 	}];
 
+	//let builders = [
+	//    TypeBuilder<(ins "Type":$elementType, "unsigned":$width)>
+	//];
+	//let skipDefaultBuilders = 1;
+
 	let parameters = (ins "unsigned":$width);
 	let assemblyFormat = "`<` $width `>`";
 

@@ -13,8 +13,6 @@ def PrimInt_AddOp : Op<Primitive_Dialect, "add", [Pure,SameOperandsAndResultElem
 	let results = (outs Prim_IntegerType:$output);
 	let assemblyFormat =  "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($output)";
 	let hasFolder = 1;
-	// verify op
-	//let hasVerifier = 1;
 }
 
 def PrimInt_ConstantOp : Op<Primitive_Dialect, "constant", [Pure, ConstantLike]> {

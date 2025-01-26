@@ -1,1 +1,1 @@
-add_subdirectory(PrimitiveDialect)
+add_subdirectory(Primitive)
