@@ -5,13 +5,14 @@ include "PrimitiveDialect.td"
 include "PrimitiveTypes.td"
 include "PrimitiveAttr.td"
 include "mlir/IR/OpBase.td"
+include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 
-def PrimInt_AddOp : Op<Primitive_Dialect, "add", [Pure,SameOperandsAndResultElementType]> {
+def PrimInt_AddOp : Op<Primitive_Dialect, "add", [Pure,SameOperandsAndResultType]> {
 	let summary = "Addition operation between to ints";
 	let arguments = (ins Prim_IntegerType:$lhs, Prim_IntegerType:$rhs);
 	let results = (outs Prim_IntegerType:$output);
-	let assemblyFormat =  "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($output)";
+	let assemblyFormat =  "$lhs `,` $rhs attr-dict `:` qualified(type($output))";
 	let hasFolder = 1;
 }
 
