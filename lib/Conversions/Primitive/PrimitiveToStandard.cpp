@@ -35,6 +35,23 @@ struct ConvertAdd : public mlir::OpConversionPattern<AddOp>{
 	}
 };
 
+struct ConvertConstant : public mlir::OpConversionPattern<ConstantOp>{
+	ConvertConstant(mlir::TypeConverter& type_convertor, MLIRContext* context) 
+		: mlir::OpConversionPattern<ConstantOp>(type_convertor,context){}
+
+	LogicalResult matchAndRewrite(ConstantOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		//mlir::IntegerAttr val = mlir::IntegerAttr::get(op.getContext(),op) 
+		mlir::IntegerType intType = mlir::IntegerType::get(op.getContext(), op.getOutput().getType().getWidth());
+		mlir::IntegerAttr intAttr = mlir::IntegerAttr::get(intType, op.getValue().getValue());
+    	
+    	// Create the arith.constant operation
+		arith::ConstantOp constOp = rewriter.create<arith::ConstantOp>(op.getLoc(),intAttr);
+
+		rewriter.replaceOp(op.getOperation(), constOp.getOperation());
+		return llvm::success();
+	}
+};
+
 struct PrimToStandard : impl::PrimToStandardBase<PrimToStandard> {
 
   void runOnOperation() override {
@@ -48,6 +65,7 @@ struct PrimToStandard : impl::PrimToStandardBase<PrimToStandard> {
 	mlir::RewritePatternSet patterns(context);
 	PrimitiveToStandardTypeConverter type_convertor(context);
 	patterns.add<ConvertAdd>(type_convertor,context);
+	patterns.add<ConvertConstant>(type_convertor,context);
 
 	populateFunctionOpInterfaceTypeConversionPattern<mlir::func::FuncOp>(
         patterns, type_convertor);
