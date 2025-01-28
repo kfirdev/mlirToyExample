@@ -109,8 +109,12 @@ mlir::OpFoldResult ConstantOp::fold(ConstantOp::FoldAdaptor adaptor){
 }
 
 mlir::OpFoldResult AddOp::fold(AddOp::FoldAdaptor adaptor){
-	auto lhs = mlir::cast<IntegerAttr>(adaptor.getLhs()).getValue();
-	auto rhs = mlir::cast<IntegerAttr>(adaptor.getRhs()).getValue();
+
+	if (adaptor.getRhs() == NULL || adaptor.getLhs() == NULL){
+		return nullptr;
+	}
+	auto lhs = mlir::cast<IntegerAttr>(adaptor.getOperands()[0]).getValue();
+	auto rhs = mlir::cast<IntegerAttr>(adaptor.getOperands()[1]).getValue();
 	auto result = IntegerAttr::get(getType(),lhs+rhs);
 	return result;
 }

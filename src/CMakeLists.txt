@@ -6,8 +6,8 @@ set (LIBS
     ${conversion_libs}
 	MLIROptLib
 	MLIRPrinPass
-	#MLIRToy	
 	MLIRPrim
+	MLIRPrimLowerPass
 )
 
 add_llvm_executable(toy-opt main.cpp)
