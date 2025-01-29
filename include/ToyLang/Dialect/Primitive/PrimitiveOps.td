@@ -8,12 +8,28 @@ include "mlir/IR/OpBase.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 
-def PrimInt_AddOp : Op<Primitive_Dialect, "add", [Pure,SameOperandsAndResultType]> {
-	let summary = "Addition operation between to ints";
-	let arguments = (ins Prim_IntegerType:$lhs, Prim_IntegerType:$rhs);
-	let results = (outs Prim_IntegerType:$output);
+class Primitive_BinOpBase<string name> : Op<Primitive_Dialect, name, [Pure,SameOperandsAndResultType]>{
 	let assemblyFormat =  "$lhs `,` $rhs attr-dict `:` qualified(type($output))";
 	let hasFolder = 1;
+}
+
+class Primitve_IntOpBase<string name> : Primitive_BinOpBase<name>{
+	let arguments = (ins Prim_IntegerType:$lhs, Prim_IntegerType:$rhs);
+	let results = (outs Prim_IntegerType:$output);
+}
+
+
+def PrimInt_AddOp : Primitve_IntOpBase<"add"> {
+	let summary = "Addition operation between to ints";
+}
+def PrimInt_MultOp : Primitve_IntOpBase<"mul"> {
+	let summary = "Addition operation between to ints";
+}
+def PrimInt_SubOp : Primitve_IntOpBase<"sub"> {
+	let summary = "Addition operation between to ints";
+}
+def PrimInt_DivOp : Primitve_IntOpBase<"div"> {
+	let summary = "Addition operation between to ints";
 }
 
 def PrimInt_ConstantOp : Op<Primitive_Dialect, "constant", [Pure, ConstantLike]> {
