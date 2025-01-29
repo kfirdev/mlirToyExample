@@ -6,5 +6,6 @@ config.suffixes = [".mlir"]
 config.excludes = ["CMakeLists.txt", "README.txt"]
 config.test_source_root = os.path.dirname(__file__)
 config.test_exec_root = config.test_source_root
+config.environment["LIT_OPTS"] = "-v"
 
 
