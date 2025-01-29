@@ -34,6 +34,43 @@ struct ConvertAdd : public mlir::OpConversionPattern<AddOp>{
 		return llvm::success();
 	}
 };
+struct ConvertSub : public mlir::OpConversionPattern<SubOp>{
+	ConvertSub(mlir::TypeConverter& type_convertor, MLIRContext* context) 
+		: mlir::OpConversionPattern<SubOp>(type_convertor,context){}
+
+	LogicalResult matchAndRewrite(SubOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		arith::SubIOp subOp = rewriter.create<arith::SubIOp>(
+				op.getLoc(), adaptor.getLhs(), adaptor.getRhs());
+
+		rewriter.replaceOp(op.getOperation(), subOp.getOperation());
+		return llvm::success();
+	}
+};
+
+struct ConvertMult : public mlir::OpConversionPattern<MultOp>{
+	ConvertMult(mlir::TypeConverter& type_convertor, MLIRContext* context) 
+		: mlir::OpConversionPattern<MultOp>(type_convertor,context){}
+
+	LogicalResult matchAndRewrite(MultOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		arith::MulIOp mulOp = rewriter.create<arith::MulIOp>(
+				op.getLoc(), adaptor.getLhs(), adaptor.getRhs());
+
+		rewriter.replaceOp(op.getOperation(), mulOp.getOperation());
+		return llvm::success();
+	}
+};
+struct ConvertDiv : public mlir::OpConversionPattern<DivOp>{
+	ConvertDiv(mlir::TypeConverter& type_convertor, MLIRContext* context) 
+		: mlir::OpConversionPattern<DivOp>(type_convertor,context){}
+
+	LogicalResult matchAndRewrite(DivOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		arith::DivSIOp divOp = rewriter.create<arith::DivSIOp>(
+				op.getLoc(), adaptor.getLhs(), adaptor.getRhs());
+
+		rewriter.replaceOp(op.getOperation(), divOp.getOperation());
+		return llvm::success();
+	}
+};
 
 struct ConvertConstant : public mlir::OpConversionPattern<ConstantOp>{
 	ConvertConstant(mlir::TypeConverter& type_convertor, MLIRContext* context) 
@@ -65,6 +102,9 @@ struct PrimToStandard : impl::PrimToStandardBase<PrimToStandard> {
 	mlir::RewritePatternSet patterns(context);
 	PrimitiveToStandardTypeConverter type_convertor(context);
 	patterns.add<ConvertAdd>(type_convertor,context);
+	patterns.add<ConvertSub>(type_convertor,context);
+	patterns.add<ConvertMult>(type_convertor,context);
+	patterns.add<ConvertDiv>(type_convertor,context);
 	patterns.add<ConvertConstant>(type_convertor,context);
 
 	populateFunctionOpInterfaceTypeConversionPattern<mlir::func::FuncOp>(

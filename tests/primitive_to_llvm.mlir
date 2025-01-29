@@ -3,10 +3,11 @@
 // RUN: clang primitive_to_llvm_main.o %t -o a.out
 // RUN: ./a.out | FileCheck %s
 
-// CHECK: 12
+// CHECK: 1
 func.func @test_primitive_fn(%arg0: !primitive.int<32>) -> !primitive.int<32> {
-  %c1 = primitive.constant 5 : !primitive.int<32>
-  %0 = primitive.add %arg0, %c1 : !primitive.int<32>
-  %1 = primitive.add %0, %0 : !primitive.int<32>
-  return %1 : !primitive.int<32>
+  %2 = primitive.add %arg0, %arg0 : !primitive.int<32> // 2
+  %3 = primitive.mul %2, %2 : !primitive.int<32> // 4
+  %4 = primitive.sub %3, %2 : !primitive.int<32> // 2
+  %5 = primitive.div %4, %2 : !primitive.int<32> // 1
+  return %5 : !primitive.int<32>
 }
