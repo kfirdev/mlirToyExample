@@ -17,6 +17,7 @@ class PrimitiveToStandardTypeConverter : public TypeConverter {
 		PrimitiveToStandardTypeConverter(MLIRContext *ctx) {
 			addConversion([](Type type) { return type; });
  	 	  	addConversion([ctx](IntegerType type) -> Type {
+				// have an if with the trait convert to the right type based on the trait.
 				return mlir::IntegerType::get(type.getContext(),type.getWidth(),mlir::IntegerType::Signless);
  	 	  	});
  	 	}
@@ -27,6 +28,7 @@ struct ConvertAdd : public mlir::OpConversionPattern<AddOp>{
 		: mlir::OpConversionPattern<AddOp>(type_convertor,context){}
 
 	LogicalResult matchAndRewrite(AddOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		// based on the type convert to different op (has trait on op get type).
 		arith::AddIOp addOp = rewriter.create<arith::AddIOp>(
 				op.getLoc(), adaptor.getLhs(), adaptor.getRhs());
 
@@ -39,6 +41,7 @@ struct ConvertSub : public mlir::OpConversionPattern<SubOp>{
 		: mlir::OpConversionPattern<SubOp>(type_convertor,context){}
 
 	LogicalResult matchAndRewrite(SubOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		// based on the type convert to different op (has trait on op get type).
 		arith::SubIOp subOp = rewriter.create<arith::SubIOp>(
 				op.getLoc(), adaptor.getLhs(), adaptor.getRhs());
 
@@ -52,6 +55,7 @@ struct ConvertMult : public mlir::OpConversionPattern<MultOp>{
 		: mlir::OpConversionPattern<MultOp>(type_convertor,context){}
 
 	LogicalResult matchAndRewrite(MultOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		// based on the type convert to different op (has trait on op get type).
 		arith::MulIOp mulOp = rewriter.create<arith::MulIOp>(
 				op.getLoc(), adaptor.getLhs(), adaptor.getRhs());
 
@@ -64,6 +68,7 @@ struct ConvertDiv : public mlir::OpConversionPattern<DivOp>{
 		: mlir::OpConversionPattern<DivOp>(type_convertor,context){}
 
 	LogicalResult matchAndRewrite(DivOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		// based on the type convert to different op (has trait on op get type).
 		arith::DivSIOp divOp = rewriter.create<arith::DivSIOp>(
 				op.getLoc(), adaptor.getLhs(), adaptor.getRhs());
 
@@ -77,7 +82,7 @@ struct ConvertConstant : public mlir::OpConversionPattern<ConstantOp>{
 		: mlir::OpConversionPattern<ConstantOp>(type_convertor,context){}
 
 	LogicalResult matchAndRewrite(ConstantOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
-		//mlir::IntegerAttr val = mlir::IntegerAttr::get(op.getContext(),op) 
+		//converted with multiple options one for each type
 		mlir::IntegerType intType = mlir::IntegerType::get(op.getContext(), op.getOutput().getType().getWidth());
 		mlir::IntegerAttr intAttr = mlir::IntegerAttr::get(intType, mlir::cast<IntegerAttr>(op.getValue()).getValue());
     	

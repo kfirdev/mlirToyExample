@@ -8,11 +8,13 @@ include "mlir/IR/OpBase.td"
 // You should create an interface that all of your attributes will have in order to interact with them in a general way.
 // This means that this interface should have all of the function needed for the general interactions.
 // Functions:
-// 1. getValue to return the value as a string just for printing.
-//def AttrInterface : AttrInterface<"AttrInterface">{
+// 1. getValueStr to return the value as a string just for printing.
+//def MyAttrInterface : AttrInterface<"MyAttrInterface">{
 //}
 
 // An interface should also be created for the types in order to the width and stuff needed by the types.
+//def MyTypeInterface : TypeInterface<"MyTypeInterface">{
+//}
 // 1. getWidth returns unsigned int which is the width.
 
 #endif

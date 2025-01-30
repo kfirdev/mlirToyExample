@@ -75,12 +75,10 @@ mlir::Operation *PrimitiveDialect::materializeConstant(::mlir::OpBuilder &builde
                                          ::mlir::Attribute value,
                                          ::mlir::Type type,
                                          ::mlir::Location loc){
-	auto val = mlir::dyn_cast<IntegerAttr>(value);
-
-	if (!val)
+	if (!value.hasTrait<IsAnInteger>())
 		return nullptr;
 
-	return builder.create<ConstantOp>(loc,type,val);
+	return builder.create<ConstantOp>(loc,type,value);
 }
 
 } // namespace mlir::toylang::primitive

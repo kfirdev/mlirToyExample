@@ -43,7 +43,7 @@ def PrimInt_ConstantOp : Op<Primitive_Dialect, "constant", [Pure, ConstantLike]>
 	let hasCustomAssemblyFormat = 1;
 
 	let builders = [
-		OpBuilder<(ins "Type":$type, "IntegerAttr":$value)>
+		OpBuilder<(ins "Type":$type, "Attribute":$value)>
 	];
 	let skipDefaultBuilders = 1;
 

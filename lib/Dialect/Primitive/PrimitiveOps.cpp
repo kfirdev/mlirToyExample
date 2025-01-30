@@ -10,7 +10,9 @@ mlir::LogicalResult ConstantOp::verify(){
     if (!getType().hasTrait<IsAnInteger>())
       return emitOpError("Invalid type for constant");
 
+	// should be casted to the type interface when it is finished.
     auto type = mlir::dyn_cast<IntegerType>(getType());
+	// should be catsted to the attribute interface when it is finished which will directly return a string.
     auto value = mlir::cast<IntegerAttr>(getValue()).getValue();
   
   
@@ -31,16 +33,18 @@ mlir::LogicalResult ConstantOp::verify(){
 }
 
 
-void ConstantOp::build(::mlir::OpBuilder &odsBuilder, ::mlir::OperationState &odsState, Type type,IntegerAttr value){
-  //auto val = IntegerAttr::get(type,value.getValue());
+void ConstantOp::build(::mlir::OpBuilder &odsBuilder, ::mlir::OperationState &odsState, Type type,Attribute value){
   odsState.getOrAddProperties<ConstantOpAdaptor::Properties>().value = value;
   odsState.addTypes(type);
 }
 
 mlir::OpFoldResult ConstantOp::fold(ConstantOp::FoldAdaptor adaptor){
+	// Need to understand if this becomes a problem...
 	return adaptor.getValue();
 }
 
+// ops will done or from the interface itself or in some other way.
+// currently unknown...
 mlir::OpFoldResult AddOp::fold(AddOp::FoldAdaptor adaptor){
 
 	if (adaptor.getRhs() == NULL || adaptor.getLhs() == NULL){
