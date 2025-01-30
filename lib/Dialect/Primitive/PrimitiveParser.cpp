@@ -4,31 +4,40 @@
 
 namespace mlir::toylang::primitive{
 
-::mlir::ParseResult parseIntegerType(::mlir::OpAsmParser &parser,::mlir::Type &outputRawType, llvm::APInt &intValue){
-  if (parser.parseColon())
-    return ::mlir::failure();
-  {
-    ::mlir::toylang::primitive::IntegerType type;
-    if (parser.parseCustomTypeWithFallback(type))
-      return ::mlir::failure();
+::mlir::ParseResult parseWidth(::mlir::OpAsmParser &parser,unsigned& width){
+	if (parser.parseOptionalColon())
+  	  return ::mlir::failure();
 
-    if (type.getWidth() < intValue.getActiveBits()){
-  	std::string valueStr;
-  	llvm::raw_string_ostream valueStream(valueStr);
-  	intValue.print(valueStream, true);
-  	valueStream.flush();
-  	return parser.emitError(parser.getCurrentLocation()) << "Value (" << valueStr << ") exceeds the allowed bit-width (" 
-                       << type.getWidth() << ") of the integer type. The value requires at least "
-                       << intValue.getActiveBits() << " bits to represent.";
-      }
-
-    intValue = intValue.sext(type.getWidth());
-    outputRawType = type;
-  }
-  return mlir::success();
+	if (parser.parseInteger(width)){
+		return mlir::failure();
+	}
+	return mlir::success();
 }
 
-::mlir::ParseResult parseAttributeAndType(::mlir::OpAsmParser &parser, ::mlir::Attribute &attribute,::mlir::Type &outputRawType){
+::mlir::ParseResult parseIntegerType(::mlir::OpAsmParser &parser,::mlir::Type &outputRawType, llvm::APInt &intValue){
+
+	unsigned width = 0;
+	if (parseWidth(parser,width)){
+	    width = intValue.getBitWidth();
+	}
+	
+	outputRawType = IntegerType::get(parser.getContext(),width);
+	
+	if (width < intValue.getActiveBits()){
+		std::string valueStr;
+		llvm::raw_string_ostream valueStream(valueStr);
+		intValue.print(valueStream, true);
+		valueStream.flush();
+		return parser.emitError(parser.getCurrentLocation()) << "Value (" << valueStr << ") exceeds the allowed bit-width (" 
+	                   << width << ") of the integer type. The value requires at least "
+	                   << intValue.getActiveBits() << " bits to represent.";
+	}
+	
+	intValue = intValue.sext(width);
+	return mlir::success();
+}
+
+::mlir::ParseResult parseAttributeAndType(::mlir::OpAsmParser &parser, PrimitiveAttrInterface &attribute,::mlir::Type &outputRawType){
 
 	bool isNegative = false;
     
@@ -66,7 +75,7 @@ namespace mlir::toylang::primitive{
 
 ::mlir::ParseResult ConstantOp::parse(::mlir::OpAsmParser &parser, ::mlir::OperationState &result) {
   //::mlir::toylang::primitive::IntegerAttr valueAttr;
-  mlir::Attribute valueAttr;
+  PrimitiveAttrInterface valueAttr;
   ::mlir::Type outputRawType{};
   ::llvm::ArrayRef<::mlir::Type> outputTypes(&outputRawType, 1);
 

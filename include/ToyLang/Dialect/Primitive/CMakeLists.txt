@@ -11,3 +11,8 @@ mlir_tablegen(PrimitiveOps.cpp.inc -gen-op-defs)
 mlir_tablegen(PrimitiveAttr.h.inc -gen-attrdef-decls)
 mlir_tablegen(PrimitiveAttr.cpp.inc -gen-attrdef-defs)
 add_public_tablegen_target(MLIRPrimDialectIncGen)
+
+set(LLVM_TARGET_DEFINITIONS PrimitiveInterfaces.td)
+mlir_tablegen(PrimitiveInterfaces.h.inc -gen-attr-interface-decls)
+mlir_tablegen(PrimitiveInterfaces.cpp.inc -gen-attr-interface-defs)
+add_public_tablegen_target(MLIRPrimInterfaceIncGen)

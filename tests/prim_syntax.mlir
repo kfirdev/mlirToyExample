@@ -23,6 +23,6 @@ func.func @test_constants() -> !primitive.int<10> {
 
   //CHECK: primitive.constant 
   //%0 = primitive.constant -1.6510 : !primitive.int<10>
-  %0 = primitive.constant -1 : !primitive.int<10>
+  %0 = primitive.constant -1 : 10 
   return %0 : !primitive.int<10>
 }

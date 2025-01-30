@@ -1,4 +1,5 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveDialect.h"
+#include "include/ToyLang/Dialect/Primitive/PrimitiveInterfaces.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveAttr.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveTypes.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveOps.h"
@@ -9,6 +10,7 @@
 #include "mlir/Support/LLVM.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/ADT/TypeSwitch.h"
+#include <string>
 
 namespace mlir {
 template <>
@@ -36,6 +38,7 @@ struct FieldParser<llvm::APInt> {
 
 
 namespace mlir::toylang::primitive{
+#include "ToyLang/Dialect/Primitive/PrimitiveInterfaces.cpp.inc"
 
 void PrimitiveDialect::initialize(){
 	addTypes<
@@ -60,13 +63,8 @@ IntegerAttr IntegerAttr::get(Type type, const APInt &value) {
 
 }
 llvm::LogicalResult IntegerAttr::verify(llvm::function_ref<::mlir::InFlightDiagnostic()> emitError, mlir::Type type, APInt value){
-	// These should NEVER fail if this fails something is wrong with the initialization of the attribute.
 	if (!type.hasTrait<IsAnInteger>()){
 		 return emitError() << "Type given is not an integer";
-	}
-	IntegerType intType = mlir::cast<IntegerType>(type);
-	if (intType.getWidth() != value.getBitWidth()){
-		 return emitError() << "Wrong bit width";
 	}
     return success();
 }
@@ -75,10 +73,11 @@ mlir::Operation *PrimitiveDialect::materializeConstant(::mlir::OpBuilder &builde
                                          ::mlir::Attribute value,
                                          ::mlir::Type type,
                                          ::mlir::Location loc){
-	if (!value.hasTrait<IsAnInteger>())
+	auto val = mlir::dyn_cast<PrimitiveAttrInterface>(value);
+	if (!val)
 		return nullptr;
 
-	return builder.create<ConstantOp>(loc,type,value);
+	return builder.create<ConstantOp>(loc,type,val);
 }
 
 } // namespace mlir::toylang::primitive

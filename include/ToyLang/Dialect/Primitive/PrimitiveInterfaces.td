@@ -9,8 +9,36 @@ include "mlir/IR/OpBase.td"
 // This means that this interface should have all of the function needed for the general interactions.
 // Functions:
 // 1. getValueStr to return the value as a string just for printing.
-//def MyAttrInterface : AttrInterface<"MyAttrInterface">{
-//}
+def PrimitiveAttrInterface : AttrInterface<"PrimitiveAttrInterface">{
+	let description = [{
+		This is an interface it interact with all of the attributes in the primitive dialect.
+	}];
+
+	let methods = [
+		InterfaceMethod<
+		"Get the value of an attribute as a String",
+		"std::string", "getValueStr",(ins)>,
+		InterfaceMethod<
+		"Get the width of the value",
+		"unsigned", "getWidth",(ins)>,
+		InterfaceMethod<
+		"Get the active bits/minimal bit width for this data",
+		"unsigned", "getActiveWidth",(ins)>,
+		InterfaceMethod<
+		"Add two primitive interface attributes",
+		"PrimitiveAttrInterface", "add",(ins "PrimitiveAttrInterface&":$other)>,
+		InterfaceMethod<
+		"Subtract two primitive interface attributes",
+		"PrimitiveAttrInterface", "sub",(ins "PrimitiveAttrInterface&":$other)>,
+		InterfaceMethod<
+		"Multiply two primitive interface attributes",
+		"PrimitiveAttrInterface", "mult",(ins "PrimitiveAttrInterface&":$other)>,
+		InterfaceMethod<
+		"Divide two primitive interface attributes",
+		"PrimitiveAttrInterface", "div",(ins "PrimitiveAttrInterface&":$other)>,
+	];
+
+}
 
 // An interface should also be created for the types in order to the width and stuff needed by the types.
 //def MyTypeInterface : TypeInterface<"MyTypeInterface">{

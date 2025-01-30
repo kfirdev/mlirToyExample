@@ -35,7 +35,7 @@ def PrimInt_DivOp : Primitve_IntOpBase<"div"> {
 def PrimInt_ConstantOp : Op<Primitive_Dialect, "constant", [Pure, ConstantLike]> {
 	let	summary = "Define a constnat int";
 	//let arguments = (ins Prim_IntegerAttr:$value);
-	let arguments = (ins AnyAttrOf<[Prim_IntegerAttr]>:$value);
+	let arguments = (ins PrimitiveAttrInterface:$value);
 	//let arguments = (ins AnyI32Attr:$value);
 	let results = (outs Prim_IntegerType:$output);
 	//let assemblyFormat = "$value attr-dict type($output)";
@@ -43,7 +43,7 @@ def PrimInt_ConstantOp : Op<Primitive_Dialect, "constant", [Pure, ConstantLike]>
 	let hasCustomAssemblyFormat = 1;
 
 	let builders = [
-		OpBuilder<(ins "Type":$type, "Attribute":$value)>
+		OpBuilder<(ins "Type":$type, "PrimitiveAttrInterface":$value)>
 	];
 	let skipDefaultBuilders = 1;
 
