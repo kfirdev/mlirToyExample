@@ -1,8 +1,13 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveAttr.h"
+#include "include/ToyLang/Dialect/Primitive/PrimitiveTypes.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveInterfaces.h"
 
 namespace mlir::toylang::primitive{
+//IntegerType
+mlir::Type IntegerType::toStandard() const{
+	return mlir::IntegerType::get(getContext(),getWidth(),mlir::IntegerType::Signless);
+}
 
 // IntegerAttr
 PrimitiveAttrInterface IntegerAttr::add(PrimitiveAttrInterface& other) const{

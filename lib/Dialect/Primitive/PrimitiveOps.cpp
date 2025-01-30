@@ -8,7 +8,7 @@ namespace mlir::toylang::primitive{
 
 mlir::LogicalResult ConstantOp::verify(){
 
-    auto type = mlir::dyn_cast<IntegerType>(getType());
+    auto type = mlir::dyn_cast<PrimitiveTypeInterface>(getType());
     auto value = mlir::dyn_cast<PrimitiveAttrInterface>(getValue());
 	
 	if (!type || !value)

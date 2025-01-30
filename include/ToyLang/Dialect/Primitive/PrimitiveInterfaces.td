@@ -44,8 +44,19 @@ def PrimitiveAttrInterface : AttrInterface<"PrimitiveAttrInterface">{
 }
 
 // An interface should also be created for the types in order to the width and stuff needed by the types.
-//def MyTypeInterface : TypeInterface<"MyTypeInterface">{
-//}
 // 1. getWidth returns unsigned int which is the width.
+def PrimitiveTypeInterface : TypeInterface<"PrimitiveTypeInterface">{
+	let description = [{
+		This is an interface it interact with all of the types in the primitive dialect.
+	}];
+	let methods = [
+		InterfaceMethod<
+		"Get the width of the value",
+		"unsigned", "getWidth",(ins)>,
+		InterfaceMethod<
+		"Convert the type to a standard type",
+		"mlir::Type", "toStandard",(ins)>,
+	];
+}
 
 #endif

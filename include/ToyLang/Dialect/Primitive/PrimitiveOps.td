@@ -37,7 +37,7 @@ def PrimInt_ConstantOp : Op<Primitive_Dialect, "constant", [Pure, ConstantLike]>
 	//let arguments = (ins Prim_IntegerAttr:$value);
 	let arguments = (ins PrimitiveAttrInterface:$value);
 	//let arguments = (ins AnyI32Attr:$value);
-	let results = (outs Prim_IntegerType:$output);
+	let results = (outs PrimitiveTypeInterface:$output);
 	//let assemblyFormat = "$value attr-dict type($output)";
 	//let assemblyFormat = "$value attr-dict `:` type($output)";
 	let hasCustomAssemblyFormat = 1;

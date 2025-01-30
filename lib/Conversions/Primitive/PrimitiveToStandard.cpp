@@ -16,9 +16,8 @@ class PrimitiveToStandardTypeConverter : public TypeConverter {
 	public:
 		PrimitiveToStandardTypeConverter(MLIRContext *ctx) {
 			addConversion([](Type type) { return type; });
- 	 	  	addConversion([ctx](IntegerType type) -> Type {
-				// have an if with the trait convert to the right type based on the trait.
-				return mlir::IntegerType::get(type.getContext(),type.getWidth(),mlir::IntegerType::Signless);
+ 	 	  	addConversion([ctx](PrimitiveTypeInterface type) -> Type {
+				return type.toStandard();
  	 	  	});
  	 	}
 };

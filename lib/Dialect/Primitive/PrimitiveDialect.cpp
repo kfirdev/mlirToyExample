@@ -38,7 +38,8 @@ struct FieldParser<llvm::APInt> {
 
 
 namespace mlir::toylang::primitive{
-#include "ToyLang/Dialect/Primitive/PrimitiveInterfaces.cpp.inc"
+#include "ToyLang/Dialect/Primitive/PrimitiveAttrInterfaces.cpp.inc"
+#include "ToyLang/Dialect/Primitive/PrimitiveTypeInterfaces.cpp.inc"
 
 void PrimitiveDialect::initialize(){
 	addTypes<

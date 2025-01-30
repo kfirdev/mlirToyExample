@@ -108,7 +108,7 @@ _odsPrinter.printStrippedAttrOrType(getValueAttr());
   {
     auto type = getOutput().getType();
 	// convert to the interface for the type instead
-    if (auto validType = ::llvm::dyn_cast<::mlir::toylang::primitive::IntegerType>(type))
+    if (auto validType = ::llvm::dyn_cast<PrimitiveTypeInterface>(type))
       _odsPrinter.printStrippedAttrOrType(validType);
    else
      _odsPrinter << type;

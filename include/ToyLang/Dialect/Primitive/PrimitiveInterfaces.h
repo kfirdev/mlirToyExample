@@ -7,6 +7,7 @@
 
 namespace mlir::toylang::primitive{
 
-#include "ToyLang/Dialect/Primitive/PrimitiveInterfaces.h.inc"
+#include "ToyLang/Dialect/Primitive/PrimitiveAttrInterfaces.h.inc"
+#include "ToyLang/Dialect/Primitive/PrimitiveTypeInterfaces.h.inc"
 
 }
