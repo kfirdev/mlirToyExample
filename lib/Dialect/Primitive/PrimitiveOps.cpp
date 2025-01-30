@@ -1,13 +1,18 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveOps.h"
+#include "mlir/AsmParser/AsmParserState.h"
+#include "mlir/IR/OpImplementation.h"
 
 namespace mlir::toylang::primitive{
 
 mlir::LogicalResult ConstantOp::verify(){
-    auto type = mlir::dyn_cast<IntegerType>(getType());
-    auto value = getValue().getValue();
-  
-    if (!type)
+	// Probably better to have an interface for these to not directly convert to integer type because it might not be.
+
+    if (!getType().hasTrait<IsAnInteger>())
       return emitOpError("Invalid type for constant");
+
+    auto type = mlir::dyn_cast<IntegerType>(getType());
+    auto value = mlir::cast<IntegerAttr>(getValue()).getValue();
+  
   
     unsigned bitWidth = type.getWidth();
 
@@ -31,9 +36,6 @@ void ConstantOp::build(::mlir::OpBuilder &odsBuilder, ::mlir::OperationState &od
   odsState.getOrAddProperties<ConstantOpAdaptor::Properties>().value = value;
   odsState.addTypes(type);
 }
-
-
-
 
 mlir::OpFoldResult ConstantOp::fold(ConstantOp::FoldAdaptor adaptor){
 	return adaptor.getValue();
@@ -83,4 +85,4 @@ mlir::OpFoldResult DivOp::fold(DivOp::FoldAdaptor adaptor){
 	return result;
 }
 
-}
+}// namespace mlir::toylang::primitive

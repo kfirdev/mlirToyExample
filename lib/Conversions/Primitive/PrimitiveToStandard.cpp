@@ -79,7 +79,7 @@ struct ConvertConstant : public mlir::OpConversionPattern<ConstantOp>{
 	LogicalResult matchAndRewrite(ConstantOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
 		//mlir::IntegerAttr val = mlir::IntegerAttr::get(op.getContext(),op) 
 		mlir::IntegerType intType = mlir::IntegerType::get(op.getContext(), op.getOutput().getType().getWidth());
-		mlir::IntegerAttr intAttr = mlir::IntegerAttr::get(intType, op.getValue().getValue());
+		mlir::IntegerAttr intAttr = mlir::IntegerAttr::get(intType, mlir::cast<IntegerAttr>(op.getValue()).getValue());
     	
     	// Create the arith.constant operation
 		arith::ConstantOp constOp = rewriter.create<arith::ConstantOp>(op.getLoc(),intAttr);

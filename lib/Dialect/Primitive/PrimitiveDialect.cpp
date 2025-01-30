@@ -56,18 +56,18 @@ void PrimitiveDialect::initialize(){
 }
 
 IntegerAttr IntegerAttr::get(Type type, const APInt &value) {
-  auto integerType = mlir::dyn_cast<IntegerType>(type);
-  if (value.getBitWidth() != integerType.getWidth()) {
-    return Base::get(type.getContext(), type, value.zextOrTrunc(integerType.getWidth()));
-  }
   return Base::get(type.getContext(), type, value);
 
 }
 llvm::LogicalResult IntegerAttr::verify(llvm::function_ref<::mlir::InFlightDiagnostic()> emitError, mlir::Type type, APInt value){
-	
-	//if (!mlir::isa<mlir::IntegerType>(type)){
-	//	return emitError() << "Expected an integer type but got " << type;
-	//}
+	// These should NEVER fail if this fails something is wrong with the initialization of the attribute.
+	if (!type.hasTrait<IsAnInteger>()){
+		 return emitError() << "Type given is not an integer";
+	}
+	IntegerType intType = mlir::cast<IntegerType>(type);
+	if (intType.getWidth() != value.getBitWidth()){
+		 return emitError() << "Wrong bit width";
+	}
     return success();
 }
 
@@ -83,5 +83,5 @@ mlir::Operation *PrimitiveDialect::materializeConstant(::mlir::OpBuilder &builde
 	return builder.create<ConstantOp>(loc,type,val);
 }
 
-}
+} // namespace mlir::toylang::primitive
 
