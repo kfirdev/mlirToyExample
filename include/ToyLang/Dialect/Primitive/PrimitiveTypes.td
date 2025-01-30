@@ -2,13 +2,15 @@
 #define LIB_DIALECT_PRIM_POLYTYPES_TD_
 
 include "PrimitiveDialect.td"
+include "PrimitiveTraits.td"
+include "PrimitiveInterfaces.td"
 include "mlir/IR/AttrTypeBase.td"
 
-class Prim_Type<string name, string typeMnemonic> : TypeDef<Primitive_Dialect, name>{
+class Prim_Type<string name, string typeMnemonic, list<Trait> traits = []> : TypeDef<Primitive_Dialect, name,traits>{
 	let mnemonic = typeMnemonic;
 }
 
-def Prim_IntegerType : Prim_Type<"Integer","int"> {
+def Prim_IntegerType : Prim_Type<"Integer","int",[IsAnInteger,DeclareTypeInterfaceMethods<PrimitiveTypeInterface>]> {
 	let summary = "Integer type with arbitrary precision up to a fixed limit";
 	let description = [{
 		Integer types with a given precision.

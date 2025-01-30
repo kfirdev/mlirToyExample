@@ -3,12 +3,14 @@
 
 include "mlir/IR/AttrTypeBase.td"
 include "PrimitiveDialect.td"
+include "PrimitiveTraits.td"
+include "PrimitiveInterfaces.td"
 
-class Primitive_Attr<string name, string attrMnemonic> : AttrDef<Primitive_Dialect, name>{
+class Primitive_Attr<string name, string attrMnemonic, list<Trait> traits = []> : AttrDef<Primitive_Dialect, name, traits>{
 	let mnemonic = attrMnemonic;
 }
 
-def Prim_IntegerAttr : Primitive_Attr<"Integer", "int"> {
+def Prim_IntegerAttr : Primitive_Attr<"Integer", "int", [IsAnInteger,DeclareAttrInterfaceMethods<PrimitiveAttrInterface>]> {
 	let summary = "An attribute containing a Integer value";
 	let description = [{
 		An integer attribute is a literal attribute that represents an integral

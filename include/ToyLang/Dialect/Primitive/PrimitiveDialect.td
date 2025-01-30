@@ -12,6 +12,7 @@ def Primitive_Dialect : Dialect {
 	The primitive dialect is for defining the primitives types of toylang.
   }];
 
+  let useDefaultAttributePrinterParser = 1;
   let useDefaultTypePrinterParser = 1;
   let hasConstantMaterializer = 1;
 }

@@ -12,9 +12,9 @@ namespace mlir::toylang::primitive{
 struct PrintPass : impl::PrintPassBase<PrintPass>{
 	void runOnOperation() override{
 		  getOperation()->walk([&](ConstantOp op) {
-		llvm::outs() << "ConstantOp found with bit width: " << op.getValue().getValue().getBitWidth() << "\n";
+
+		llvm::outs() << "ConstantOp found with bit width: " << op.getValue().getWidth() << "\n";
 		llvm::outs() << "Should be with bit width: " << op.getResult().getType().getWidth() << "\n";
-		//op.getOutput().getType().get
 	});
 	}
 };
