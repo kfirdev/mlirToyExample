@@ -36,6 +36,9 @@ def PrimitiveAttrInterface : AttrInterface<"PrimitiveAttrInterface">{
 		InterfaceMethod<
 		"Divide two primitive interface attributes",
 		"PrimitiveAttrInterface", "div",(ins "PrimitiveAttrInterface&":$other)>,
+		InterfaceMethod<
+		"Convert to standard",
+		"mlir::Operation*", "toStandard",(ins "ConversionPatternRewriter&":$rewriter, "mlir::Location":$loc)>,
 	];
 
 }

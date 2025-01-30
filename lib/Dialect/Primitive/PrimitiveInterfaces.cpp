@@ -1,4 +1,5 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveAttr.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveInterfaces.h"
 
 namespace mlir::toylang::primitive{
@@ -19,6 +20,14 @@ PrimitiveAttrInterface IntegerAttr::mult(PrimitiveAttrInterface& other) const{
 PrimitiveAttrInterface IntegerAttr::div(PrimitiveAttrInterface& other) const{
 	auto intAttr = mlir::cast<IntegerAttr>(other);
 	return IntegerAttr::get(getType(),getValue().sdiv(intAttr.getValue()));
+}
+mlir::Operation* IntegerAttr::toStandard(ConversionPatternRewriter& rewriter,mlir::Location loc) const{
+
+	mlir::IntegerType intType = mlir::IntegerType::get(getContext(), getWidth());
+	mlir::IntegerAttr intAttr = mlir::IntegerAttr::get(intType, getValue());
+
+	
+	return rewriter.create<arith::ConstantOp>(loc,intAttr);
 }
 std::string IntegerAttr::getValueStr() const{
 	std::string valueStr;

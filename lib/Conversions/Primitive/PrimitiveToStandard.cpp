@@ -1,11 +1,11 @@
 #include "include/ToyLang/Conversions/Primitive/PrimitiveToStandard.h"
 #include "mlir/Dialect/Func/Transforms/FuncConversions.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/Transforms/DialectConversion.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveDialect.h"
-#include "include/ToyLang/Dialect/Primitive/PrimitiveAttr.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveTypes.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveOps.h"
-#include "mlir/Transforms/DialectConversion.h"
+#include "include/ToyLang/Dialect/Primitive/PrimitiveAttr.h"
 
 namespace mlir::toylang::primitive{
 
@@ -82,14 +82,8 @@ struct ConvertConstant : public mlir::OpConversionPattern<ConstantOp>{
 		: mlir::OpConversionPattern<ConstantOp>(type_convertor,context){}
 
 	LogicalResult matchAndRewrite(ConstantOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
-		//converted with multiple options one for each type
-		mlir::IntegerType intType = mlir::IntegerType::get(op.getContext(), op.getOutput().getType().getWidth());
-		mlir::IntegerAttr intAttr = mlir::IntegerAttr::get(intType, mlir::cast<IntegerAttr>(op.getValue()).getValue());
-    	
-    	// Create the arith.constant operation
-		arith::ConstantOp constOp = rewriter.create<arith::ConstantOp>(op.getLoc(),intAttr);
-
-		rewriter.replaceOp(op.getOperation(), constOp.getOperation());
+		mlir::Operation* constOp = op.getValue().toStandard(rewriter,op.getLoc());
+		rewriter.replaceOp(op.getOperation(), constOp);
 		return llvm::success();
 	}
 };
