@@ -24,4 +24,14 @@ def Prim_IntegerType : Prim_Type<"Integer","int",[DeclareTypeInterfaceMethods<Pr
 	let assemblyFormat = "`<` $width `>`";
 
 }
+def Prim_FloatType : Prim_Type<"Float","float",[DeclareTypeInterfaceMethods<PrimitiveTypeInterface>]> {
+	let summary = "Float type with arbitrary precision up to a fixed limit";
+	let description = [{
+		Float types with a given precision.
+	}];
+
+	let parameters = (ins "unsigned":$width);
+	let assemblyFormat = "`<` $width `>`";
+
+}
 #endif

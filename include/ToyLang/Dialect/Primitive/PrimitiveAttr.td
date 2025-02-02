@@ -27,22 +27,24 @@ def Prim_IntegerAttr : Primitive_Attr<"Integer", "int", [DeclareAttrInterfaceMet
 
 	let skipDefaultBuilders = 1;
 }
-//def Prim_FloatAttr : Primitive_Attr<"Float", "float", [DeclareAttrInterfaceMethods<PrimitiveAttrInterface>]> {
-//	let summary = "An attribute containing a Integer value";
-//	let description = [{
-//		An integer attribute is a literal attribute that represents an integral
-//    	value of the specified integer type.
-//	}];
-//
-//	let parameters = (ins AttributeSelfTypeParameter<"">:$type, "APInt":$value);
-//    let assemblyFormat = "$value";
-//
-//	let builders = [
-//	  AttrBuilderWithInferredContext<(ins "Type":$type,"const APInt &":$value)>
-//  	];
-//
-//    let genVerifyDecl = 1;
-//
-//	let skipDefaultBuilders = 1;
-//}
+
+def Prim_FloatAttr : Primitive_Attr<"Float", "float", [DeclareAttrInterfaceMethods<PrimitiveAttrInterface>]> {
+	let summary = "An attribute containing a float value";
+	let description = [{
+		A float attribute is a literal attribute that represents an integral
+    	value of the specified float type.
+	}];
+
+	let parameters = (ins AttributeSelfTypeParameter<"">:$type, "APFloat":$value);
+    let assemblyFormat = "$value";
+
+	let builders = [
+	  AttrBuilderWithInferredContext<(ins "Type":$type,"const APFloat &":$value)>,
+	  AttrBuilder<(ins "Type":$type,"const APFloat &":$value)>
+  	];
+
+    //let genVerifyDecl = 1;
+
+	let skipDefaultBuilders = 1;
+}
 #endif

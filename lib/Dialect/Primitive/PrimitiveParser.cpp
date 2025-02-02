@@ -1,6 +1,7 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveOps.h"
 #include "mlir/AsmParser/AsmParserState.h"
 #include "mlir/IR/OpImplementation.h"
+#include <string>
 
 namespace mlir::toylang::primitive{
 
@@ -37,6 +38,35 @@ namespace mlir::toylang::primitive{
 	return mlir::success();
 }
 
+::mlir::ParseResult parseFloatType(::mlir::OpAsmParser &parser,::mlir::Type &outputRawType,double &floatValue,llvm::APFloat &finalValue){
+
+	unsigned width = 0;
+	if (parseWidth(parser,width)){
+	    width = 32;
+	}
+	
+	outputRawType = FloatType::get(parser.getContext(),width);
+
+	std::string value = std::to_string(floatValue);
+	switch(width){
+		case 16:
+			finalValue = llvm::APFloat{llvm::APFloat::IEEEhalf(),value};
+			break;
+		case 32:
+			finalValue = llvm::APFloat{llvm::APFloat::IEEEsingle(),value};
+			break;
+		case 64:
+			finalValue = llvm::APFloat{llvm::APFloat::IEEEdouble(),value};
+			break;
+		default:
+			return parser.emitError(parser.getCurrentLocation()) << width 
+				<< " is an invalid width for a float choose between 16, 32, 64";
+
+	}
+	
+	return mlir::success();
+}
+
 ::mlir::ParseResult parseAttributeAndType(::mlir::OpAsmParser &parser, PrimitiveAttrInterface &attribute,::mlir::Type &outputRawType){
 
 	bool isNegative = false;
@@ -57,15 +87,17 @@ namespace mlir::toylang::primitive{
 		return mlir::success();
 	}
 
-	llvm::APFloat floatValue{0.};
-    if (succeeded(parser.parseFloat(llvm::APFloat::IEEEdouble(),floatValue))){
+	double floatValue;
+    if (succeeded(parser.parseFloat(floatValue))){
 		if (isNegative){
-			floatValue.changeSign();
+			floatValue *= -1; 
 		}
-		llvm::errs() << "Value: ";
-		floatValue.print(llvm::errs());
-		llvm::errs() << "\n";
-        return parser.emitError(parser.getCurrentLocation(), "floats currently not supported");
+		llvm::APFloat finalValue{0.};
+		if (parseFloatType(parser,outputRawType,floatValue,finalValue))
+			return mlir::failure();
+
+		attribute = FloatAttr::get(outputRawType,finalValue);
+		return mlir::success();
 	}
 
 

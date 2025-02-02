@@ -16,11 +16,11 @@ mlir::LogicalResult ConstantOp::verify(){
   
     unsigned bitWidth = type.getWidth();
 
-    if (value.getActiveWidth() > bitWidth) {
-		 return emitOpError() << "Value (" << value.getValueStr() << ") exceeds the allowed bit-width (" 
-                             << bitWidth << ") of the integer type. The value requires at least "
-                             << value.getActiveWidth() << " bits to represent.";
-    }
+    //if (value.getActiveWidth() > bitWidth) {
+	//	 return emitOpError() << "Value (" << value.getValueStr() << ") exceeds the allowed bit-width (" 
+    //                         << bitWidth << ") of the integer type. The value requires at least "
+    //                         << value.getActiveWidth() << " bits to represent.";
+    //}
   
     return success();
 }

@@ -22,7 +22,8 @@ func.func @test_binops_syntax(%arg0: !primitive.int<32>,%arg1: !primitive.int<32
 func.func @test_constants() -> !primitive.int<10> {
 
   //CHECK: primitive.constant 
-  //%0 = primitive.constant -1.6510 : !primitive.int<10>
   %0 = primitive.constant -1 : 10 
+  //CHECK: primitive.constant 
+  %1 = primitive.constant -1.6 : 16 
   return %0 : !primitive.int<10>
 }
