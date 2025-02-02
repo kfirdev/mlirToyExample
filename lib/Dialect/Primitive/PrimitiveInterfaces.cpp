@@ -50,28 +50,41 @@ unsigned IntegerAttr::getActiveWidth() const{
 
 //FloatType
 mlir::Type FloatType::toStandard() const{
-	//return mlir::FloatType::get(getContext(),getWidth(),mlir::Float32Type::Signless);
-	return mlir::Float32Type{};
+	switch(getWidth()){
+		case 16:
+			return mlir::Float16Type::get(getContext());
+		case 32:
+			return mlir::Float32Type::get(getContext());
+		case 64:
+			return mlir::Float64Type::get(getContext());
+		default:
+			return mlir::Float64Type::get(getContext());
+	}
 }
 
 //FloatAttr
-
 PrimitiveAttrInterface FloatAttr::add(PrimitiveAttrInterface& other) const{
 	auto intAttr = mlir::cast<FloatAttr>(other);
-	return FloatAttr::get(getType(),getValue()+intAttr.getValue());
+	llvm::APFloat result = getValue();
+	result.add(intAttr.getValue(),llvm::RoundingMode::NearestTiesToAway);
+	return FloatAttr::get(getType(),result);
 }
 PrimitiveAttrInterface FloatAttr::sub(PrimitiveAttrInterface& other) const{
 	auto intAttr = mlir::cast<FloatAttr>(other);
-	return FloatAttr::get(getType(),getValue()-intAttr.getValue());
+	llvm::APFloat result = getValue();
+	result.subtract(intAttr.getValue(),llvm::RoundingMode::NearestTiesToAway);
+	return FloatAttr::get(getType(),result);
 }
 PrimitiveAttrInterface FloatAttr::mult(PrimitiveAttrInterface& other) const{
 	auto intAttr = mlir::cast<FloatAttr>(other);
-	return FloatAttr::get(getType(),getValue()*intAttr.getValue());
+	llvm::APFloat result = getValue();
+	result.multiply(intAttr.getValue(),llvm::RoundingMode::NearestTiesToAway);
+	return FloatAttr::get(getType(),result);
 }
 PrimitiveAttrInterface FloatAttr::div(PrimitiveAttrInterface& other) const{
 	auto floatAttr = mlir::cast<FloatAttr>(other);
 	llvm::APFloat result = getValue();
-	auto _ = result.divide(floatAttr.getValue(),llvm::RoundingMode::Dynamic);
+	auto _ = result.divide(floatAttr.getValue(),llvm::RoundingMode::NearestTiesToAway);
 	return FloatAttr::get(getType(),result);
 }
 mlir::Operation* FloatAttr::toStandard(ConversionPatternRewriter& rewriter,mlir::Location loc) const{

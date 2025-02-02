@@ -14,8 +14,8 @@ class Primitive_BinOpBase<string name> : Op<Primitive_Dialect, name, [Pure,SameO
 }
 
 class Primitve_IntOpBase<string name> : Primitive_BinOpBase<name>{
-	let arguments = (ins Prim_IntegerType:$lhs, Prim_IntegerType:$rhs);
-	let results = (outs Prim_IntegerType:$output);
+	let arguments = (ins PrimitiveTypeInterface:$lhs, PrimitiveTypeInterface:$rhs);
+	let results = (outs PrimitiveTypeInterface:$output);
 }
 
 
