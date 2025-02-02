@@ -10,5 +10,12 @@ class  IsAnInteger: public OpTrait::TraitBase<ConcreteType, IsAnInteger> {
     return success();
   }
 };
+template <typename ConcreteType>
+class  IsAFloat: public OpTrait::TraitBase<ConcreteType, IsAFloat> {
+ public:
+  static LogicalResult verifyTrait(Operation *op) {
+    return success();
+  }
+};
 
 }

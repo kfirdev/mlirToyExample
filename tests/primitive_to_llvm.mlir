@@ -11,3 +11,11 @@ func.func @test_primitive_fn(%arg0: !primitive.int<32>) -> !primitive.int<32> {
   %5 = primitive.div %4, %2 : !primitive.int<32> // 1
   return %5 : !primitive.int<32>
 }
+// CHECK: 4.28
+func.func @test_primitive_fn_double(%arg0: !primitive.float<32>) -> !primitive.float<32> {
+  %2 = primitive.add %arg0, %arg0 : !primitive.float<32> // 2.4
+  %3 = primitive.mul %2, %2 : !primitive.float<32> // 5.76
+  %4 = primitive.sub %3, %2 : !primitive.float<32> // 3.36
+  %5 = primitive.div %4, %2 : !primitive.float<32> // 1.4
+  return %5 : !primitive.float<32>
+}

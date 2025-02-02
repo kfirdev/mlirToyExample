@@ -8,19 +8,19 @@ namespace mlir::toylang::primitive{
 
 mlir::LogicalResult ConstantOp::verify(){
 
-    auto type = mlir::dyn_cast<PrimitiveTypeInterface>(getType());
-    auto value = mlir::dyn_cast<PrimitiveAttrInterface>(getValue());
+    auto type = getType();
+    auto value = getValue();
 	
 	if (!type || !value)
       return emitOpError("Invalid type for constant");
   
     unsigned bitWidth = type.getWidth();
 
-    if (value.getActiveWidth() > bitWidth) {
-		 return emitOpError() << "Value (" << value.getValueStr() << ") exceeds the allowed bit-width (" 
-                             << bitWidth << ") of the integer type. The value requires at least "
-                             << value.getActiveWidth() << " bits to represent.";
-    }
+    //if (value.getActiveWidth() > bitWidth) {
+	//	 return emitOpError() << "Value (" << value.getValueStr() << ") exceeds the allowed bit-width (" 
+    //                         << bitWidth << ") of the integer type. The value requires at least "
+    //                         << value.getActiveWidth() << " bits to represent.";
+    //}
   
     return success();
 }

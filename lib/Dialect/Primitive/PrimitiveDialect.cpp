@@ -23,6 +23,16 @@ struct FieldParser<llvm::APInt> {
 	}
 
 };
+template <>
+struct FieldParser<llvm::APFloat> {
+	static FailureOr<llvm::APFloat> parse(AsmParser &parser) {
+		llvm::APFloat value{0.0};
+    	if (parser.parseFloat(llvm::APFloat::IEEEdouble(),value))
+    	  return failure();
+    	return value;
+	}
+
+};
 
 }
 
@@ -61,14 +71,21 @@ void PrimitiveDialect::initialize(){
 
 IntegerAttr IntegerAttr::get(Type type, const APInt &value) {
   return Base::get(type.getContext(), type, value);
-
 }
+
+FloatAttr FloatAttr::get(Type type, const APFloat &value) {
+  return Base::get(type.getContext(), type, value);
+}
+FloatAttr FloatAttr::get(mlir::MLIRContext* context,Type type, const APFloat &value) {
+  return Base::get(context, type, value);
+}
+
 llvm::LogicalResult IntegerAttr::verify(llvm::function_ref<::mlir::InFlightDiagnostic()> emitError, mlir::Type type, APInt value){
 	// These should NEVER fail if this fails something is wrong with the initialization of the attribute.
-	if (!type.hasTrait<IsAnInteger>()){
-		 return emitError() << "Type given is not an integer";
+	IntegerType intType = mlir::dyn_cast<IntegerType>(type);
+	if (!intType){
+		return failure();
 	}
-	IntegerType intType = mlir::cast<IntegerType>(type);
 	if (intType.getWidth() != value.getBitWidth()){
 		 return emitError() << "Wrong bit width";
 	}

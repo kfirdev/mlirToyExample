@@ -1,7 +1,6 @@
 #pragma once
 
 //#include "mlir/IR/DialectImplementation.h"
-#include "include/ToyLang/Dialect/Primitive/PrimitiveTraits.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveDialect.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveInterfaces.h"
 //#include "mlir/IR/BuiltinOps.h"    // from @llvm-project

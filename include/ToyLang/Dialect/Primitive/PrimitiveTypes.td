@@ -10,7 +10,7 @@ class Prim_Type<string name, string typeMnemonic, list<Trait> traits = []> : Typ
 	let mnemonic = typeMnemonic;
 }
 
-def Prim_IntegerType : Prim_Type<"Integer","int",[IsAnInteger,DeclareTypeInterfaceMethods<PrimitiveTypeInterface>]> {
+def Prim_IntegerType : Prim_Type<"Integer","int",[DeclareTypeInterfaceMethods<PrimitiveTypeInterface>,IsAnInteger]> {
 	let summary = "Integer type with arbitrary precision up to a fixed limit";
 	let description = [{
 		Integer types with a given precision.
@@ -20,6 +20,16 @@ def Prim_IntegerType : Prim_Type<"Integer","int",[IsAnInteger,DeclareTypeInterfa
 	//    TypeBuilder<(ins "Type":$elementType, "unsigned":$width)>
 	//];
 	//let skipDefaultBuilders = 1;
+
+	let parameters = (ins "unsigned":$width);
+	let assemblyFormat = "`<` $width `>`";
+
+}
+def Prim_FloatType : Prim_Type<"Float","float",[DeclareTypeInterfaceMethods<PrimitiveTypeInterface>,IsAFloat]> {
+	let summary = "Float type with arbitrary precision up to a fixed limit";
+	let description = [{
+		Float types with a given precision.
+	}];
 
 	let parameters = (ins "unsigned":$width);
 	let assemblyFormat = "`<` $width `>`";

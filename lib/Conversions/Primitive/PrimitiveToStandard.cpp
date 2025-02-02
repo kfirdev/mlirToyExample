@@ -28,10 +28,17 @@ struct ConvertAdd : public mlir::OpConversionPattern<AddOp>{
 
 	LogicalResult matchAndRewrite(AddOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
 		// based on the type convert to different op (has trait on op get type).
-		arith::AddIOp addOp = rewriter.create<arith::AddIOp>(
-				op.getLoc(), adaptor.getLhs(), adaptor.getRhs());
+		mlir::Operation* addOp;
+		if (op.getType().hasTrait<IsAnInteger>()){
+			addOp = rewriter.create<arith::AddIOp>(
+					op.getLoc(), adaptor.getLhs(), adaptor.getRhs()).getOperation();
+		}
+		if (op.getType().hasTrait<IsAFloat>()){
+			addOp = rewriter.create<arith::AddFOp>(
+					op.getLoc(), adaptor.getLhs(), adaptor.getRhs()).getOperation();
+		}
 
-		rewriter.replaceOp(op.getOperation(), addOp.getOperation());
+		rewriter.replaceOp(op.getOperation(), addOp);
 		return llvm::success();
 	}
 };
@@ -40,11 +47,18 @@ struct ConvertSub : public mlir::OpConversionPattern<SubOp>{
 		: mlir::OpConversionPattern<SubOp>(type_convertor,context){}
 
 	LogicalResult matchAndRewrite(SubOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
-		// based on the type convert to different op (has trait on op get type).
-		arith::SubIOp subOp = rewriter.create<arith::SubIOp>(
-				op.getLoc(), adaptor.getLhs(), adaptor.getRhs());
 
-		rewriter.replaceOp(op.getOperation(), subOp.getOperation());
+		mlir::Operation* subOp;
+		if (op.getType().hasTrait<IsAnInteger>()){
+			subOp = rewriter.create<arith::SubIOp>(
+					op.getLoc(), adaptor.getLhs(), adaptor.getRhs()).getOperation();
+		}
+		if (op.getType().hasTrait<IsAFloat>()){
+			subOp = rewriter.create<arith::SubFOp>(
+					op.getLoc(), adaptor.getLhs(), adaptor.getRhs()).getOperation();
+		}
+
+		rewriter.replaceOp(op.getOperation(), subOp);
 		return llvm::success();
 	}
 };
@@ -55,10 +69,17 @@ struct ConvertMult : public mlir::OpConversionPattern<MultOp>{
 
 	LogicalResult matchAndRewrite(MultOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
 		// based on the type convert to different op (has trait on op get type).
-		arith::MulIOp mulOp = rewriter.create<arith::MulIOp>(
-				op.getLoc(), adaptor.getLhs(), adaptor.getRhs());
+		mlir::Operation* multOp;
+		if (op.getType().hasTrait<IsAnInteger>()){
+			multOp = rewriter.create<arith::MulIOp>(
+					op.getLoc(), adaptor.getLhs(), adaptor.getRhs()).getOperation();
+		}
+		if (op.getType().hasTrait<IsAFloat>()){
+			multOp = rewriter.create<arith::MulFOp>(
+					op.getLoc(), adaptor.getLhs(), adaptor.getRhs()).getOperation();
+		}
 
-		rewriter.replaceOp(op.getOperation(), mulOp.getOperation());
+		rewriter.replaceOp(op.getOperation(), multOp);
 		return llvm::success();
 	}
 };
@@ -68,10 +89,17 @@ struct ConvertDiv : public mlir::OpConversionPattern<DivOp>{
 
 	LogicalResult matchAndRewrite(DivOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
 		// based on the type convert to different op (has trait on op get type).
-		arith::DivSIOp divOp = rewriter.create<arith::DivSIOp>(
-				op.getLoc(), adaptor.getLhs(), adaptor.getRhs());
+		mlir::Operation* divOp;
+		if (op.getType().hasTrait<IsAnInteger>()){
+			divOp = rewriter.create<arith::DivSIOp>(
+					op.getLoc(), adaptor.getLhs(), adaptor.getRhs()).getOperation();
+		}
+		if (op.getType().hasTrait<IsAFloat>()){
+			divOp = rewriter.create<arith::DivFOp>(
+					op.getLoc(), adaptor.getLhs(), adaptor.getRhs()).getOperation();
+		}
 
-		rewriter.replaceOp(op.getOperation(), divOp.getOperation());
+		rewriter.replaceOp(op.getOperation(), divOp);
 		return llvm::success();
 	}
 };

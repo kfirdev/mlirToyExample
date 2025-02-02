@@ -48,4 +48,77 @@ unsigned IntegerAttr::getActiveWidth() const{
 	return getValue().getActiveBits();
 }
 
+//FloatType
+mlir::Type FloatType::toStandard() const{
+	switch(getWidth()){
+		case 16:
+			return mlir::Float16Type::get(getContext());
+		case 32:
+			return mlir::Float32Type::get(getContext());
+		case 64:
+			return mlir::Float64Type::get(getContext());
+		default:
+			return mlir::Float64Type::get(getContext());
+	}
+}
+
+//FloatAttr
+PrimitiveAttrInterface FloatAttr::add(PrimitiveAttrInterface& other) const{
+	auto intAttr = mlir::cast<FloatAttr>(other);
+	llvm::APFloat result = getValue();
+	result.add(intAttr.getValue(),llvm::RoundingMode::NearestTiesToAway);
+	return FloatAttr::get(getType(),result);
+}
+PrimitiveAttrInterface FloatAttr::sub(PrimitiveAttrInterface& other) const{
+	auto intAttr = mlir::cast<FloatAttr>(other);
+	llvm::APFloat result = getValue();
+	result.subtract(intAttr.getValue(),llvm::RoundingMode::NearestTiesToAway);
+	return FloatAttr::get(getType(),result);
+}
+PrimitiveAttrInterface FloatAttr::mult(PrimitiveAttrInterface& other) const{
+	auto intAttr = mlir::cast<FloatAttr>(other);
+	llvm::APFloat result = getValue();
+	result.multiply(intAttr.getValue(),llvm::RoundingMode::NearestTiesToAway);
+	return FloatAttr::get(getType(),result);
+}
+PrimitiveAttrInterface FloatAttr::div(PrimitiveAttrInterface& other) const{
+	auto floatAttr = mlir::cast<FloatAttr>(other);
+	llvm::APFloat result = getValue();
+	auto _ = result.divide(floatAttr.getValue(),llvm::RoundingMode::NearestTiesToAway);
+	return FloatAttr::get(getType(),result);
+}
+mlir::Operation* FloatAttr::toStandard(ConversionPatternRewriter& rewriter,mlir::Location loc) const{
+
+	//mlir::FloatType intType = mlir::Float32Type;
+	mlir::FloatAttr intAttr = mlir::FloatAttr::get(mlir::Float32Type{}, getValue());
+
+	
+	return rewriter.create<arith::ConstantOp>(loc,intAttr);
+}
+std::string FloatAttr::getValueStr() const{
+	std::string valueStr;
+    llvm::raw_string_ostream valueStream(valueStr);
+	getValue().print(valueStream);
+    valueStream.flush();
+	return valueStr;
+}
+unsigned FloatAttr::getWidth() const{
+	//	return getValue().getBitWidth();
+	const auto &sem = getValue().getSemantics();
+	const auto &sem16 = llvm::APFloat::IEEEhalf();
+	const auto &sem32 = llvm::APFloat::IEEEsingle();
+	const auto &sem64 = llvm::APFloat::IEEEdouble();
+	if (&sem == &sem16)
+		return 16;
+	if (&sem == &sem32)
+		return 32;
+	if (&sem == &sem64)
+		return 64;
+	return 0;
+}
+unsigned FloatAttr::getActiveWidth() const{
+	//return getValue().getActiveBits();
+	return getWidth();
+}
+
 } // namespace mlir::toylang::primitive
