@@ -27,3 +27,11 @@ func.func @test_simple_float(%arg0: !primitive.float<32>) -> !primitive.float<32
   return %5 : !primitive.float<32>
 }
 
+// CHECK-LABEL: @test_bool
+func.func @test_bool(%arg0: !primitive.bool) -> !primitive.bool {
+  // CHECK: arith.andi
+  %0 = primitive.mul %arg0, %arg0: !primitive.bool
+  // CHECK: arith.ori
+  %1 = primitive.div %0, %arg0 : !primitive.bool
+  return %1 : !primitive.bool
+}

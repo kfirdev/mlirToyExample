@@ -184,7 +184,7 @@ unsigned BoolAttr::getActiveWidth() const{
 
 // BoolType
 mlir::Type BoolType::toStandard() const{
-	return mlir::IntegerType::get(getContext(),1,mlir::IntegerType::Unsigned);
+	return mlir::IntegerType::get(getContext(),1,mlir::IntegerType::Signless);
 }
 mlir::Operation* BoolType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
 	//return rewriter.create<arith::AddIOp>(
@@ -197,12 +197,12 @@ mlir::Operation* BoolType::subToStandard(ConversionPatternRewriter& rewriter,mli
 	return nullptr;
 }
 mlir::Operation* BoolType::divToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
-	//return rewriter.create<arith::DivSIOp>(
-	//		loc, lhs, rhs).getOperation();
+	return rewriter.create<arith::OrIOp>(
+			loc, lhs, rhs).getOperation();
 	return nullptr;
 }
 mlir::Operation* BoolType::multToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
-	return rewriter.create<arith::MulIOp>(
+	return rewriter.create<arith::AndIOp>(
 			loc, lhs, rhs).getOperation();
 }
 unsigned BoolType::getWidth() const {
