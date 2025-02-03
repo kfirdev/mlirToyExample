@@ -153,4 +153,60 @@ unsigned FloatAttr::getActiveWidth() const{
 	return getWidth();
 }
 
+//BoolAttr
+PrimitiveAttrInterface BoolAttr::add(PrimitiveAttrInterface& other) const{
+	return NULL;
+}
+PrimitiveAttrInterface BoolAttr::sub(PrimitiveAttrInterface& other) const{
+	return NULL;
+}
+PrimitiveAttrInterface BoolAttr::div(PrimitiveAttrInterface& other) const{
+	auto intAttr = mlir::cast<BoolAttr>(other);
+	return BoolAttr::get(getType(),getValue() || intAttr.getValue());
+}
+PrimitiveAttrInterface BoolAttr::mult(PrimitiveAttrInterface& other) const{
+	auto intAttr = mlir::cast<BoolAttr>(other);
+	return BoolAttr::get(getType(),getValue() && intAttr.getValue());
+}
+mlir::Operation* BoolAttr::toStandard(ConversionPatternRewriter& rewriter,mlir::Location loc) const{
+	mlir::BoolAttr intAttr = mlir::BoolAttr::get(getContext(), getValue());
+	return rewriter.create<arith::ConstantOp>(loc,intAttr);
+}
+std::string BoolAttr::getValueStr() const{
+	return getValue() ? "true" : "false";
+}
+unsigned BoolAttr::getWidth() const{
+	return 1;
+}
+unsigned BoolAttr::getActiveWidth() const{
+	return 1;
+}
+
+// BoolType
+mlir::Type BoolType::toStandard() const{
+	return mlir::IntegerType::get(getContext(),1,mlir::IntegerType::Unsigned);
+}
+mlir::Operation* BoolType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	//return rewriter.create<arith::AddIOp>(
+	//		loc, lhs, rhs).getOperation();
+	return nullptr;
+}
+mlir::Operation* BoolType::subToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	//return rewriter.create<arith::SubIOp>(
+	//		loc, lhs, rhs).getOperation();
+	return nullptr;
+}
+mlir::Operation* BoolType::divToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	//return rewriter.create<arith::DivSIOp>(
+	//		loc, lhs, rhs).getOperation();
+	return nullptr;
+}
+mlir::Operation* BoolType::multToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::MulIOp>(
+			loc, lhs, rhs).getOperation();
+}
+unsigned BoolType::getWidth() const {
+	return 1;
+}
+
 } // namespace mlir::toylang::primitive

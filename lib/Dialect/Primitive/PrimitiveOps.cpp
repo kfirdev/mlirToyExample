@@ -16,15 +16,40 @@ mlir::LogicalResult ConstantOp::verify(){
   
     unsigned bitWidth = type.getWidth();
 
-    //if (value.getActiveWidth() > bitWidth) {
-	//	 return emitOpError() << "Value (" << value.getValueStr() << ") exceeds the allowed bit-width (" 
-    //                         << bitWidth << ") of the integer type. The value requires at least "
-    //                         << value.getActiveWidth() << " bits to represent.";
-    //}
+    if (value.getActiveWidth() > bitWidth) {
+		 return emitOpError() << "Value (" << value.getValueStr() << ") exceeds the allowed bit-width (" 
+                             << bitWidth << ") of the integer type. The value requires at least "
+                             << value.getActiveWidth() << " bits to represent.";
+    }
   
     return success();
 }
 
+mlir::LogicalResult AddOp::verify(){
+	//llvm::errs() << getResult() << "\n";
+	if (getResult().getType().hasTrait<IsABool>()) {
+		 return emitOpError() << "cannot be applied to type " << getType(); 
+	}
+	return success();
+}
+mlir::LogicalResult SubOp::verify(){
+	if (getResult().getType().hasTrait<IsABool>()) {
+		 return emitOpError() << "cannot be applied to type " << getType(); 
+	}
+	return success();
+}
+mlir::LogicalResult DivOp::verify(){
+	//if (getResult().getType().hasTrait<IsABool>()) {
+	//	 return emitOpError() << "cannot be applied to type " << getType(); 
+	//}
+	return success();
+}
+mlir::LogicalResult MultOp::verify(){
+	//if (getResult().getType().hasTrait<IsABool>()) {
+	//	 return emitOpError() << "cannot be applied to (" << getType() << ")"; 
+	//}
+	return success();
+}
 
 void ConstantOp::build(::mlir::OpBuilder &odsBuilder, ::mlir::OperationState &odsState, Type type,PrimitiveAttrInterface value){
   odsState.getOrAddProperties<ConstantOpAdaptor::Properties>().value = value;

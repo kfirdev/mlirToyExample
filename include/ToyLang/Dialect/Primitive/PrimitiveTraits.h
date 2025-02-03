@@ -17,5 +17,12 @@ class  IsAFloat: public OpTrait::TraitBase<ConcreteType, IsAFloat> {
     return success();
   }
 };
+template <typename ConcreteType>
+class  IsABool: public OpTrait::TraitBase<ConcreteType, IsABool> {
+ public:
+  static LogicalResult verifyTrait(Operation *op) {
+    return success();
+  }
+};
 
 }

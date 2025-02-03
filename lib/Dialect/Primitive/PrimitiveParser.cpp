@@ -67,10 +67,33 @@ namespace mlir::toylang::primitive{
 	return mlir::success();
 }
 
+::mlir::ParseResult parseBoolType(::mlir::OpAsmParser &parser,::mlir::Type &outputRawType){
+	outputRawType = BoolType::get(parser.getContext());
+	return mlir::success();
+}
+
+::mlir::ParseResult parseOptionalBool(::mlir::OpAsmParser &parser,bool &boolValue){
+	if (parser.parseOptionalKeyword("true").succeeded()){
+		boolValue = true;
+		return mlir::success();
+	}
+	if (parser.parseOptionalKeyword("false").succeeded()){
+		boolValue = false;
+		return mlir::success();
+	}
+	return mlir::failure();
+}
+
 ::mlir::ParseResult parseAttributeAndType(::mlir::OpAsmParser &parser, PrimitiveAttrInterface &attribute,::mlir::Type &outputRawType){
 
+	bool boolValue;
+	if (succeeded(parseOptionalBool(parser,boolValue))){
+		outputRawType = BoolType::get(parser.getContext());
+		attribute = BoolAttr::get(outputRawType,boolValue);
+		return mlir::success();
+	}
+
 	bool isNegative = false;
-    
     // Check for a leading '-' (negative sign)
     if (succeeded(parser.parseOptionalMinus())) {
         isNegative = true;
@@ -86,6 +109,7 @@ namespace mlir::toylang::primitive{
 		attribute = IntegerAttr::get(outputRawType,intValue);
 		return mlir::success();
 	}
+
 
 	double floatValue;
     if (succeeded(parser.parseFloat(floatValue))){

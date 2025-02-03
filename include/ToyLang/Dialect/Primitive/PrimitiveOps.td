@@ -11,6 +11,7 @@ include "mlir/Interfaces/SideEffectInterfaces.td"
 class Primitive_BinOpBase<string name> : Op<Primitive_Dialect, name, [Pure,SameOperandsAndResultType]>{
 	let assemblyFormat =  "$lhs `,` $rhs attr-dict `:` qualified(type($output))";
 	let hasFolder = 1;
+	let hasVerifier = 1;
 }
 
 class Primitve_IntOpBase<string name> : Primitive_BinOpBase<name>{

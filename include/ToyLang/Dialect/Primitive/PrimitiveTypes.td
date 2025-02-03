@@ -35,4 +35,11 @@ def Prim_FloatType : Prim_Type<"Float","float",[DeclareTypeInterfaceMethods<Prim
 	let assemblyFormat = "`<` $width `>`";
 
 }
+def Prim_BoolType : Prim_Type<"Bool","bool",[DeclareTypeInterfaceMethods<PrimitiveTypeInterface>,IsABool]> {
+	let summary = "Bool type";
+	let description = [{
+		bool type. 
+	}];
+	let parameters = (ins);
+}
 #endif
