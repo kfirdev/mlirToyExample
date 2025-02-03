@@ -8,6 +8,22 @@ namespace mlir::toylang::primitive{
 mlir::Type IntegerType::toStandard() const{
 	return mlir::IntegerType::get(getContext(),getWidth(),mlir::IntegerType::Signless);
 }
+mlir::Operation* IntegerType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::AddIOp>(
+			loc, lhs, rhs).getOperation();
+}
+mlir::Operation* IntegerType::subToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::SubIOp>(
+			loc, lhs, rhs).getOperation();
+}
+mlir::Operation* IntegerType::divToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::DivSIOp>(
+			loc, lhs, rhs).getOperation();
+}
+mlir::Operation* IntegerType::multToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::MulIOp>(
+			loc, lhs, rhs).getOperation();
+}
 
 // IntegerAttr
 PrimitiveAttrInterface IntegerAttr::add(PrimitiveAttrInterface& other) const{
@@ -60,6 +76,22 @@ mlir::Type FloatType::toStandard() const{
 		default:
 			return mlir::Float64Type::get(getContext());
 	}
+}
+mlir::Operation* FloatType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::AddFOp>(
+			loc, lhs, rhs).getOperation();
+}
+mlir::Operation* FloatType::subToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::SubFOp>(
+			loc, lhs, rhs).getOperation();
+}
+mlir::Operation* FloatType::divToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::DivFOp>(
+			loc, lhs, rhs).getOperation();
+}
+mlir::Operation* FloatType::multToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::MulFOp>(
+			loc, lhs, rhs).getOperation();
 }
 
 //FloatAttr

@@ -48,6 +48,22 @@ def PrimitiveTypeInterface : TypeInterface<"PrimitiveTypeInterface">{
 		InterfaceMethod<
 		"Convert the type to a standard type",
 		"mlir::Type", "toStandard",(ins)>,
+		StaticInterfaceMethod<
+		"Convert add to standard",
+		"mlir::Operation*", "addToStandard",
+		(ins "ConversionPatternRewriter&":$rewriter, "mlir::Location":$loc, "mlir::Value":$lhs, "mlir::Value":$rhs)>,
+		StaticInterfaceMethod<
+		"Convert sub to standard",
+		"mlir::Operation*", "subToStandard",
+		(ins "ConversionPatternRewriter&":$rewriter, "mlir::Location":$loc, "mlir::Value":$lhs, "mlir::Value":$rhs)>,
+		StaticInterfaceMethod<
+		"Convert mult to standard",
+		"mlir::Operation*", "multToStandard",
+		(ins "ConversionPatternRewriter&":$rewriter, "mlir::Location":$loc, "mlir::Value":$lhs, "mlir::Value":$rhs)>,
+		StaticInterfaceMethod<
+		"Convert div to standard",
+		"mlir::Operation*", "divToStandard",
+		(ins "ConversionPatternRewriter&":$rewriter, "mlir::Location":$loc, "mlir::Value":$lhs, "mlir::Value":$rhs)>,
 	];
 }
 
