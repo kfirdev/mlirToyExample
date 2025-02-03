@@ -80,6 +80,13 @@ FloatAttr FloatAttr::get(mlir::MLIRContext* context,Type type, const APFloat &va
   return Base::get(context, type, value);
 }
 
+BoolAttr BoolAttr::get(Type type, bool value){
+	return Base::get(type.getContext(),type,value);
+}
+BoolAttr BoolAttr::get(mlir::MLIRContext* context,Type type, bool value){
+	return Base::get(context,type,value);
+}
+
 llvm::LogicalResult IntegerAttr::verify(llvm::function_ref<::mlir::InFlightDiagnostic()> emitError, mlir::Type type, APInt value){
 	// These should NEVER fail if this fails something is wrong with the initialization of the attribute.
 	IntegerType intType = mlir::dyn_cast<IntegerType>(type);

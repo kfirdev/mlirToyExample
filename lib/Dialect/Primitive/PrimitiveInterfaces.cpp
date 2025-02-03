@@ -8,6 +8,22 @@ namespace mlir::toylang::primitive{
 mlir::Type IntegerType::toStandard() const{
 	return mlir::IntegerType::get(getContext(),getWidth(),mlir::IntegerType::Signless);
 }
+mlir::Operation* IntegerType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::AddIOp>(
+			loc, lhs, rhs).getOperation();
+}
+mlir::Operation* IntegerType::subToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::SubIOp>(
+			loc, lhs, rhs).getOperation();
+}
+mlir::Operation* IntegerType::divToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::DivSIOp>(
+			loc, lhs, rhs).getOperation();
+}
+mlir::Operation* IntegerType::multToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::MulIOp>(
+			loc, lhs, rhs).getOperation();
+}
 
 // IntegerAttr
 PrimitiveAttrInterface IntegerAttr::add(PrimitiveAttrInterface& other) const{
@@ -60,6 +76,22 @@ mlir::Type FloatType::toStandard() const{
 		default:
 			return mlir::Float64Type::get(getContext());
 	}
+}
+mlir::Operation* FloatType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::AddFOp>(
+			loc, lhs, rhs).getOperation();
+}
+mlir::Operation* FloatType::subToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::SubFOp>(
+			loc, lhs, rhs).getOperation();
+}
+mlir::Operation* FloatType::divToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::DivFOp>(
+			loc, lhs, rhs).getOperation();
+}
+mlir::Operation* FloatType::multToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::MulFOp>(
+			loc, lhs, rhs).getOperation();
 }
 
 //FloatAttr
@@ -119,6 +151,62 @@ unsigned FloatAttr::getWidth() const{
 unsigned FloatAttr::getActiveWidth() const{
 	//return getValue().getActiveBits();
 	return getWidth();
+}
+
+//BoolAttr
+PrimitiveAttrInterface BoolAttr::add(PrimitiveAttrInterface& other) const{
+	return NULL;
+}
+PrimitiveAttrInterface BoolAttr::sub(PrimitiveAttrInterface& other) const{
+	return NULL;
+}
+PrimitiveAttrInterface BoolAttr::div(PrimitiveAttrInterface& other) const{
+	auto intAttr = mlir::cast<BoolAttr>(other);
+	return BoolAttr::get(getType(),getValue() || intAttr.getValue());
+}
+PrimitiveAttrInterface BoolAttr::mult(PrimitiveAttrInterface& other) const{
+	auto intAttr = mlir::cast<BoolAttr>(other);
+	return BoolAttr::get(getType(),getValue() && intAttr.getValue());
+}
+mlir::Operation* BoolAttr::toStandard(ConversionPatternRewriter& rewriter,mlir::Location loc) const{
+	mlir::BoolAttr intAttr = mlir::BoolAttr::get(getContext(), getValue());
+	return rewriter.create<arith::ConstantOp>(loc,intAttr);
+}
+std::string BoolAttr::getValueStr() const{
+	return getValue() ? "true" : "false";
+}
+unsigned BoolAttr::getWidth() const{
+	return 1;
+}
+unsigned BoolAttr::getActiveWidth() const{
+	return 1;
+}
+
+// BoolType
+mlir::Type BoolType::toStandard() const{
+	return mlir::IntegerType::get(getContext(),1,mlir::IntegerType::Signless);
+}
+mlir::Operation* BoolType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	//return rewriter.create<arith::AddIOp>(
+	//		loc, lhs, rhs).getOperation();
+	return nullptr;
+}
+mlir::Operation* BoolType::subToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	//return rewriter.create<arith::SubIOp>(
+	//		loc, lhs, rhs).getOperation();
+	return nullptr;
+}
+mlir::Operation* BoolType::divToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::OrIOp>(
+			loc, lhs, rhs).getOperation();
+	return nullptr;
+}
+mlir::Operation* BoolType::multToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return rewriter.create<arith::AndIOp>(
+			loc, lhs, rhs).getOperation();
+}
+unsigned BoolType::getWidth() const {
+	return 1;
 }
 
 } // namespace mlir::toylang::primitive

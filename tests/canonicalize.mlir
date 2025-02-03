@@ -24,3 +24,13 @@ func.func @test_float() -> !primitive.float<32> {
   return %5 : !primitive.float<32>
 }
 
+// CHECK-LABEL: @test_bool
+func.func @test_bool() -> !primitive.bool {
+  // CHECK: bool true
+  // CHECK-NEXT: return
+  %c_true = primitive.constant true
+  %c_false = primitive.constant false
+  %0 = primitive.mul %c_true, %c_false : !primitive.bool //false
+  %1 = primitive.div %c_true, %0 : !primitive.bool //true
+  return %1 : !primitive.bool
+}

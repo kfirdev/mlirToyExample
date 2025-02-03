@@ -25,5 +25,12 @@ func.func @test_constants() -> !primitive.int<10> {
   %0 = primitive.constant -1 : 10 
   //CHECK: primitive.constant 
   %1 = primitive.constant -1.6 : 16 
+  %2 = primitive.constant true
   return %0 : !primitive.int<10>
+}
+
+//CHECK-LABEL: test_bool 
+func.func @test_bool(%arg0: !primitive.bool,%arg1: !primitive.bool) -> !primitive.bool {
+  %0 = primitive.mul %arg0, %arg1 : !primitive.bool
+  return %0 : !primitive.bool
 }

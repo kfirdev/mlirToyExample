@@ -9,5 +9,8 @@ def IsAnInteger : NativeTypeTrait<"IsAnInteger"> {
 def IsAFloat : NativeTypeTrait<"IsAFloat"> {
   let cppNamespace = "::mlir::toylang::primitive";
 }
+def IsABool : NativeTypeTrait<"IsABool"> {
+  let cppNamespace = "::mlir::toylang::primitive";
+}
 
 #endif

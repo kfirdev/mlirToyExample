@@ -19,3 +19,9 @@ func.func @test_primitive_fn_double(%arg0: !primitive.float<32>) -> !primitive.f
   %5 = primitive.div %4, %2 : !primitive.float<32> // 1.4
   return %5 : !primitive.float<32>
 }
+//CHECK: true
+func.func @test_bool(%arg0: !primitive.bool, %arg1: !primitive.bool) -> !primitive.bool { //arg0 = false arg1 = true
+  %0 = primitive.mul %arg0, %arg1: !primitive.bool // false
+  %1 = primitive.div %0, %arg1 : !primitive.bool // true
+  return %1 : !primitive.bool
+}
