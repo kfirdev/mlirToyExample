@@ -14,22 +14,22 @@ class Primitive_BinOpBase<string name> : Op<Primitive_Dialect, name, [Pure,SameO
 	let hasVerifier = 1;
 }
 
-class Primitve_IntOpBase<string name> : Primitive_BinOpBase<name>{
+class Primitve_OpBase<string name> : Primitive_BinOpBase<name>{
 	let arguments = (ins PrimitiveTypeInterface:$lhs, PrimitiveTypeInterface:$rhs);
 	let results = (outs PrimitiveTypeInterface:$output);
 }
 
 
-def PrimInt_AddOp : Primitve_IntOpBase<"add"> {
+def Prim_AddOp : Primitve_OpBase<"add"> {
 	let summary = "Addition operation between to ints";
 }
-def PrimInt_MultOp : Primitve_IntOpBase<"mul"> {
+def Prim_MultOp : Primitve_OpBase<"mul"> {
 	let summary = "Addition operation between to ints";
 }
-def PrimInt_SubOp : Primitve_IntOpBase<"sub"> {
+def Prim_SubOp : Primitve_OpBase<"sub"> {
 	let summary = "Addition operation between to ints";
 }
-def PrimInt_DivOp : Primitve_IntOpBase<"div"> {
+def Prim_DivOp : Primitve_OpBase<"div"> {
 	let summary = "Addition operation between to ints";
 }
 

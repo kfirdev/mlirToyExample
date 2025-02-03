@@ -33,6 +33,26 @@ struct FieldParser<llvm::APFloat> {
 	}
 
 };
+template <>
+struct FieldParser<llvm::ArrayRef<mlir::toylang::primitive::IntegerAttr>> {
+	static FailureOr<llvm::ArrayRef<mlir::toylang::primitive::IntegerAttr>> parse(AsmParser &parser) {
+		std::string strValue;
+    	if (parser.parseString(&strValue))
+    	  return failure();
+
+		std::vector<mlir::toylang::primitive::IntegerAttr> array;
+		array.reserve(strValue.length());
+
+		auto intType = mlir::toylang::primitive::IntegerType::get(parser.getContext(), 8);
+
+		for (char c : strValue)
+			array.push_back(mlir::toylang::primitive::IntegerAttr::get(intType, llvm::APInt{8,static_cast<uint32_t>(c),false,false}));
+
+		llvm::ArrayRef<mlir::toylang::primitive::IntegerAttr> final_array = std::move(array);
+    	return final_array;
+	}
+
+};
 
 }
 
@@ -86,6 +106,13 @@ BoolAttr BoolAttr::get(Type type, bool value){
 BoolAttr BoolAttr::get(mlir::MLIRContext* context,Type type, bool value){
 	return Base::get(context,type,value);
 }
+
+//StringAttr StringAttr::get(Type type, llvm::SmallVector<IntegerAttr> value){
+//	return Base::get(type.getContext(),type,value);
+//}
+//StringAttr StringAttr::get(mlir::MLIRContext* context,Type type, llvm::SmallVector<IntegerAttr> value){
+//	return Base::get(context,type,value);
+//}
 
 llvm::LogicalResult IntegerAttr::verify(llvm::function_ref<::mlir::InFlightDiagnostic()> emitError, mlir::Type type, APInt value){
 	// These should NEVER fail if this fails something is wrong with the initialization of the attribute.
