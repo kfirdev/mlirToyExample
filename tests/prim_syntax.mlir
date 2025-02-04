@@ -34,3 +34,10 @@ func.func @test_bool(%arg0: !primitive.bool,%arg1: !primitive.bool) -> !primitiv
   %0 = primitive.mul %arg0, %arg1 : !primitive.bool
   return %0 : !primitive.bool
 }
+
+//CHECK-LABEL: test_string 
+func.func @test_string(%arg0: !primitive.string,%arg1: !primitive.string) -> !primitive.string {
+  %p0 = primitive.constant "hello world"
+  %0 = primitive.add %arg0, %arg1 : !primitive.string
+  return %0 : !primitive.string
+}

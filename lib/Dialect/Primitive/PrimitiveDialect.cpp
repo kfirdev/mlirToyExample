@@ -33,28 +33,8 @@ struct FieldParser<llvm::APFloat> {
 	}
 
 };
-template <>
-struct FieldParser<llvm::ArrayRef<mlir::toylang::primitive::IntegerAttr>> {
-	static FailureOr<llvm::ArrayRef<mlir::toylang::primitive::IntegerAttr>> parse(AsmParser &parser) {
-		std::string strValue;
-    	if (parser.parseString(&strValue))
-    	  return failure();
 
-		std::vector<mlir::toylang::primitive::IntegerAttr> array;
-		array.reserve(strValue.length());
-
-		auto intType = mlir::toylang::primitive::IntegerType::get(parser.getContext(), 8);
-
-		for (char c : strValue)
-			array.push_back(mlir::toylang::primitive::IntegerAttr::get(intType, llvm::APInt{8,static_cast<uint32_t>(c),false,false}));
-
-		llvm::ArrayRef<mlir::toylang::primitive::IntegerAttr> final_array = std::move(array);
-    	return final_array;
-	}
-
-};
-
-}
+} //namespace mlir
 
 #include "ToyLang/Dialect/Primitive/PrimitiveDialect.cpp.inc"
 #define GET_TYPEDEF_CLASSES

@@ -34,3 +34,12 @@ func.func @test_bool() -> !primitive.bool {
   %1 = primitive.div %c_true, %0 : !primitive.bool //true
   return %1 : !primitive.bool
 }
+// CHECK-LABEL: @test_string
+func.func @test_string() -> !primitive.string {
+  // CHECK: string hello world 
+  // CHECK-NEXT: return
+  %p0 = primitive.constant "hello "
+  %p1 = primitive.constant "world"
+  %1 = primitive.add %p0, %p1 : !primitive.string // hello world
+  return %1 : !primitive.string
+}

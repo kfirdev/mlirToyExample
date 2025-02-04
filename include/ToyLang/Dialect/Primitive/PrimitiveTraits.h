@@ -24,5 +24,12 @@ class  IsABool: public OpTrait::TraitBase<ConcreteType, IsABool> {
     return success();
   }
 };
+template <typename ConcreteType>
+class  IsAString: public OpTrait::TraitBase<ConcreteType, IsAString> {
+ public:
+  static LogicalResult verifyTrait(Operation *op) {
+    return success();
+  }
+};
 
 }

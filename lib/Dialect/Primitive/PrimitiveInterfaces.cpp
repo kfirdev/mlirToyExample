@@ -1,6 +1,7 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveAttr.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveTypes.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
+#include "llvm/ADT/SmallVector.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveInterfaces.h"
 
 namespace mlir::toylang::primitive{
@@ -155,10 +156,10 @@ unsigned FloatAttr::getActiveWidth() const{
 
 //BoolAttr
 PrimitiveAttrInterface BoolAttr::add(PrimitiveAttrInterface& other) const{
-	return NULL;
+	return nullptr;
 }
 PrimitiveAttrInterface BoolAttr::sub(PrimitiveAttrInterface& other) const{
-	return NULL;
+	return nullptr;
 }
 PrimitiveAttrInterface BoolAttr::div(PrimitiveAttrInterface& other) const{
 	auto intAttr = mlir::cast<BoolAttr>(other);
@@ -199,7 +200,6 @@ mlir::Operation* BoolType::subToStandard(ConversionPatternRewriter& rewriter,mli
 mlir::Operation* BoolType::divToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
 	return rewriter.create<arith::OrIOp>(
 			loc, lhs, rhs).getOperation();
-	return nullptr;
 }
 mlir::Operation* BoolType::multToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
 	return rewriter.create<arith::AndIOp>(
@@ -208,5 +208,84 @@ mlir::Operation* BoolType::multToStandard(ConversionPatternRewriter& rewriter,ml
 unsigned BoolType::getWidth() const {
 	return 1;
 }
+
+
+// StringType
+mlir::Type StringType::toStandard() const{
+	//return mlir::StringType::get(getContext(),getWidth());
+	//return mlir::StringAttr::get(getWidth())
+	// TODO: convert to actual type
+	return nullptr;
+}
+mlir::Operation* StringType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	// TODO: convert actual op
+	return nullptr;
+}
+mlir::Operation* StringType::subToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return nullptr;
+}
+mlir::Operation* StringType::divToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return nullptr;
+}
+mlir::Operation* StringType::multToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+	return nullptr;
+}
+unsigned StringType::getWidth() const{
+	return 1;
+}
+
+// StringAttr
+PrimitiveAttrInterface StringAttr::add(PrimitiveAttrInterface& other) const{
+	auto intAttr = mlir::cast<StringAttr>(other);
+	llvm::SmallVector<IntegerAttr> combined; 
+	combined.reserve(getWidth()+other.getWidth());
+	for (IntegerAttr val: getValue()){
+		combined.push_back(val);
+	}
+	for (IntegerAttr val: intAttr.getValue()){
+		combined.push_back(val);
+	}
+	return StringAttr::get(getContext(), getType(),combined);
+}
+PrimitiveAttrInterface StringAttr::sub(PrimitiveAttrInterface& other) const{
+	return nullptr;
+}
+PrimitiveAttrInterface StringAttr::mult(PrimitiveAttrInterface& other) const{
+	return nullptr;
+}
+PrimitiveAttrInterface StringAttr::div(PrimitiveAttrInterface& other) const{
+	return nullptr;
+}
+mlir::Operation* StringAttr::toStandard(ConversionPatternRewriter& rewriter,mlir::Location loc) const{
+
+	//mlir::StringType intType = mlir::StringType::get(getContext(), getWidth());
+	//mlir::StringAttr::get();
+	
+	std::vector<int> res;
+	res.reserve(getWidth());
+	for (IntegerAttr val: getValue()){
+		res.push_back(val.getValue().getZExtValue());
+	}
+	std::string value {res.begin(),res.end()};
+
+	mlir::StringAttr intAttr = mlir::StringAttr::get(value, getType());
+	return rewriter.create<arith::ConstantOp>(loc,intAttr);
+}
+std::string StringAttr::getValueStr() const{
+	std::vector<int> res;
+	res.reserve(getWidth());
+	for (IntegerAttr val: getValue()){
+		res.push_back((int) val.getValue().getZExtValue());
+	}
+	std::string value {res.begin(),res.end()};
+	return value;
+}
+unsigned StringAttr::getWidth() const{
+	return getValue().size();
+}
+unsigned StringAttr::getActiveWidth() const{
+	return getValue().size();
+}
+
 
 } // namespace mlir::toylang::primitive

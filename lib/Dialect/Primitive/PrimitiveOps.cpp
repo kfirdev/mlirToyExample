@@ -8,11 +8,12 @@ namespace mlir::toylang::primitive{
 
 mlir::LogicalResult ConstantOp::verify(){
 
+	if (getType().hasTrait<IsAString>()){
+		return mlir::success();
+	}
+
     auto type = getType();
     auto value = getValue();
-	
-	if (!type || !value)
-      return emitOpError("Invalid type for constant");
   
     unsigned bitWidth = type.getWidth();
 

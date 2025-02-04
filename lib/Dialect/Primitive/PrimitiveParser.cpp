@@ -3,6 +3,49 @@
 #include "mlir/IR/OpImplementation.h"
 #include <string>
 
+namespace mlir {
+
+template <>
+struct FieldParser<llvm::ArrayRef<mlir::toylang::primitive::IntegerAttr>> {
+	static FailureOr<llvm::ArrayRef<mlir::toylang::primitive::IntegerAttr>> parse(AsmParser &parser) {
+		std::string strValue;
+    	if (parser.parseString(&strValue))
+    	  return failure();
+
+		std::vector<mlir::toylang::primitive::IntegerAttr> array;
+		array.reserve(strValue.length());
+
+		auto intType = mlir::toylang::primitive::IntegerType::get(parser.getContext(), 8);
+
+		for (char c : strValue)
+			array.push_back(mlir::toylang::primitive::IntegerAttr::get(intType, llvm::APInt{8,static_cast<uint32_t>(c),false,false}));
+
+		llvm::ArrayRef<mlir::toylang::primitive::IntegerAttr> final_array = std::move(array);
+    	return final_array;
+	}
+
+};
+template<>
+struct FieldParser<llvm::SmallVector<mlir::toylang::primitive::IntegerAttr>> {
+	static FailureOr<llvm::SmallVector<mlir::toylang::primitive::IntegerAttr>> parse(AsmParser &parser) {
+		std::string strValue;
+    	if (parser.parseString(&strValue))
+    	  return failure();
+
+		llvm::SmallVector<mlir::toylang::primitive::IntegerAttr> array;
+		array.reserve(strValue.length());
+
+		auto intType = mlir::toylang::primitive::IntegerType::get(parser.getContext(), 8);
+
+		for (char c : strValue)
+			array.push_back(mlir::toylang::primitive::IntegerAttr::get(intType, llvm::APInt{8,static_cast<uint32_t>(c),false,false}));
+
+    	return array;
+	}
+
+};
+
+} // namespace mlir
 namespace mlir::toylang::primitive{
 
 ::mlir::ParseResult parseWidth(::mlir::OpAsmParser &parser,unsigned& width){
@@ -93,6 +136,22 @@ namespace mlir::toylang::primitive{
 		return mlir::success();
 	}
 
+	std::string strValue;
+	if(parser.parseOptionalString(&strValue).succeeded()){
+		outputRawType = StringType::get(parser.getContext());
+		llvm::SmallVector<mlir::toylang::primitive::IntegerAttr> array;
+		array.reserve(strValue.length());
+
+		auto intType = IntegerType::get(parser.getContext(), 8);
+
+		for (char c : strValue)
+			array.push_back(std::move(IntegerAttr::get(intType, llvm::APInt{8,static_cast<uint32_t>(c),false,false})));
+
+		attribute = StringAttr::get(parser.getContext(),outputRawType,std::move(array));
+		return mlir::success();
+
+	}
+
 	bool isNegative = false;
     // Check for a leading '-' (negative sign)
     if (succeeded(parser.parseOptionalMinus())) {
@@ -170,5 +229,43 @@ _odsPrinter.printStrippedAttrOrType(getValueAttr());
      _odsPrinter << type;
   }
 }
+
+//StringAttr
+::mlir::Attribute StringAttr::parse(::mlir::AsmParser &odsParser, ::mlir::Type odsType) {
+  ::mlir::Builder odsBuilder(odsParser.getContext());
+  ::llvm::SMLoc odsLoc = odsParser.getCurrentLocation();
+  (void) odsLoc;
+  ::mlir::FailureOr<::mlir::Type> _result_type;
+
+  if (odsType) {
+    if (auto reqType = ::llvm::dyn_cast<::mlir::Type>(odsType)) {
+      _result_type = reqType;
+    } else {
+      odsParser.emitError(odsLoc, "invalid kind of type specified");
+      return {};
+    }
+  }
+  ::mlir::FailureOr<llvm::ArrayRef<IntegerAttr>> _result_value;
+
+  // Parse variable 'value'
+  _result_value = ::mlir::FieldParser<llvm::ArrayRef<IntegerAttr>>::parse(odsParser);
+  if (::mlir::failed(_result_value)) {
+    odsParser.emitError(odsParser.getCurrentLocation(), "failed to parse Prim_StringAttr parameter 'value' which is to be a `llvm::ArrayRef<IntegerAttr>`");
+    return {};
+  }
+  assert(::mlir::succeeded(_result_value));
+  return StringAttr::get(odsParser.getContext(),
+      ::mlir::Type((_result_type.value_or(::mlir::NoneType::get(odsParser.getContext())))),
+      llvm::SmallVector<IntegerAttr>((*_result_value)));
+}
+
+void StringAttr::print(::mlir::AsmPrinter &odsPrinter) const {
+  ::mlir::Builder odsBuilder(getContext());
+  odsPrinter << ' ';
+  //odsPrinter.printStrippedAttrOrType(getValue());
+  odsPrinter << getValueStr();
+  //odsPrinter << "value";
+}
+
 
 } // namespace mlir::toylang::primitive

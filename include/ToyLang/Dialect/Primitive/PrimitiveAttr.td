@@ -72,11 +72,11 @@ def Prim_StringAttr : Primitive_Attr<"String", "string", [DeclareAttrInterfaceMe
 		A string attribute is a literal attribute that represents a string value.
 	}];
 
-	let parameters = (ins AttributeSelfTypeParameter<"">:$type, "llvm::ArrayRef<IntegerAttr>":$value);
-	//let parameters = (ins AttributeSelfTypeParameter<"">:$type, "std::vector<IntegerAttr>":$value);
+	//let parameters = (ins AttributeSelfTypeParameter<"">:$type, "llvm::ArrayRef<IntegerAttr>":$value);
+	let parameters = (ins AttributeSelfTypeParameter<"">:$type, "llvm::SmallVector<IntegerAttr>":$value);
 	//let parameters = (ins AttributeSelfTypeParameter<"">:$type, "std::string":$value);
-    let assemblyFormat = "$value";
-	//let hasCustomAssemblyFormat = 1;
+    //let assemblyFormat = "$value";
+	let hasCustomAssemblyFormat = 1;
 	//let skipDefaultBuilders = 1;
 
 	//let builders = [

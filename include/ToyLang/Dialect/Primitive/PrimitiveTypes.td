@@ -42,4 +42,13 @@ def Prim_BoolType : Prim_Type<"Bool","bool",[DeclareTypeInterfaceMethods<Primiti
 	}];
 	let parameters = (ins);
 }
+def Prim_StringType : Prim_Type<"String","string",[DeclareTypeInterfaceMethods<PrimitiveTypeInterface>,IsAString]> {
+	let summary = "String type with arbitrary length";
+	let description = [{
+		string types with a given length.
+	}];
+
+	let parameters = (ins);
+
+}
 #endif

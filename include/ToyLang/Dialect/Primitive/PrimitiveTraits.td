@@ -12,5 +12,7 @@ def IsAFloat : NativeTypeTrait<"IsAFloat"> {
 def IsABool : NativeTypeTrait<"IsABool"> {
   let cppNamespace = "::mlir::toylang::primitive";
 }
-
+def IsAString : NativeTypeTrait<"IsAString"> {
+  let cppNamespace = "::mlir::toylang::primitive";
+}
 #endif
