@@ -27,28 +27,27 @@ mlir::LogicalResult ConstantOp::verify(){
 }
 
 mlir::LogicalResult AddOp::verify(){
-	//llvm::errs() << getResult() << "\n";
 	if (getResult().getType().hasTrait<IsABool>()) {
 		 return emitOpError() << "cannot be applied to type " << getType(); 
 	}
 	return success();
 }
 mlir::LogicalResult SubOp::verify(){
-	if (getResult().getType().hasTrait<IsABool>()) {
+	if (getResult().getType().hasTrait<IsABool>() || getResult().getType().hasTrait<IsAString>()) {
 		 return emitOpError() << "cannot be applied to type " << getType(); 
 	}
 	return success();
 }
 mlir::LogicalResult DivOp::verify(){
-	//if (getResult().getType().hasTrait<IsABool>()) {
-	//	 return emitOpError() << "cannot be applied to type " << getType(); 
-	//}
+	if (getResult().getType().hasTrait<IsAString>()) {
+		 return emitOpError() << "cannot be applied to type " << getType(); 
+	}
 	return success();
 }
 mlir::LogicalResult MultOp::verify(){
-	//if (getResult().getType().hasTrait<IsABool>()) {
-	//	 return emitOpError() << "cannot be applied to (" << getType() << ")"; 
-	//}
+	if (getResult().getType().hasTrait<IsAString>()) {
+		 return emitOpError() << "cannot be applied to (" << getType() << ")"; 
+	}
 	return success();
 }
 
