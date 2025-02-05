@@ -11,6 +11,7 @@ def PrimToStandard : Pass<"primitive-to-standard"> {
   }];
   let dependentDialects = [
     "mlir::arith::ArithDialect",
+    "mlir::tensor::TensorDialect",
     "mlir::toylang::primitive::PrimitiveDialect",
   ];
 }

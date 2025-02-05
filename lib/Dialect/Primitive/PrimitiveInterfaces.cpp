@@ -1,6 +1,9 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveAttr.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveTypes.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
+#include "mlir/Dialect/Tensor/IR/Tensor.h"
+#include "mlir/IR/ImplicitLocOpBuilder.h"
+#include "mlir/Support/LLVM.h"
 #include "llvm/ADT/SmallVector.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveInterfaces.h"
 
@@ -9,9 +12,9 @@ namespace mlir::toylang::primitive{
 mlir::Type IntegerType::toStandard() const{
 	return mlir::IntegerType::get(getContext(),getWidth(),mlir::IntegerType::Signless);
 }
-mlir::Operation* IntegerType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+mlir::Operation* IntegerType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::ValueRange operands){
 	return rewriter.create<arith::AddIOp>(
-			loc, lhs, rhs).getOperation();
+			loc, operands[0], operands[1]).getOperation();
 }
 mlir::Operation* IntegerType::subToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
 	return rewriter.create<arith::SubIOp>(
@@ -78,9 +81,9 @@ mlir::Type FloatType::toStandard() const{
 			return mlir::Float64Type::get(getContext());
 	}
 }
-mlir::Operation* FloatType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+mlir::Operation* FloatType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::ValueRange operands){
 	return rewriter.create<arith::AddFOp>(
-			loc, lhs, rhs).getOperation();
+			loc, operands[0], operands[1]).getOperation();
 }
 mlir::Operation* FloatType::subToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
 	return rewriter.create<arith::SubFOp>(
@@ -187,7 +190,7 @@ unsigned BoolAttr::getActiveWidth() const{
 mlir::Type BoolType::toStandard() const{
 	return mlir::IntegerType::get(getContext(),1,mlir::IntegerType::Signless);
 }
-mlir::Operation* BoolType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+mlir::Operation* BoolType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::ValueRange op){
 	//return rewriter.create<arith::AddIOp>(
 	//		loc, lhs, rhs).getOperation();
 	return nullptr;
@@ -212,14 +215,19 @@ unsigned BoolType::getWidth() const {
 
 // StringType
 mlir::Type StringType::toStandard() const{
-	//return mlir::StringType::get(getContext(),getWidth());
-	//return mlir::StringAttr::get(getWidth())
-	// TODO: convert to actual type
-	return nullptr;
+	mlir::IntegerType intType = mlir::IntegerType::get(getContext(), 8, mlir::IntegerType::Unsigned);
+	return mlir::RankedTensorType::get(mlir::ShapedType::kDynamic,intType);
+	//return mlir::Type{};
+	
 }
-mlir::Operation* StringType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
+mlir::Operation* StringType::addToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::ValueRange operands){
 	// TODO: convert actual op
-	return nullptr;
+	
+	mlir::IntegerType intType = mlir::IntegerType::get(rewriter.getContext(), 8, mlir::IntegerType::Unsigned);
+	mlir::RankedTensorType resultType = mlir::RankedTensorType::get(mlir::ShapedType::kDynamic,intType);
+	//return nullptr;
+	return rewriter.create<tensor::ConcatOp>(
+			loc,resultType,rewriter.getI64IntegerAttr(0),operands).getOperation();
 }
 mlir::Operation* StringType::subToStandard(ConversionPatternRewriter& rewriter,mlir::Location loc,mlir::Value lhs, mlir::Value rhs){
 	return nullptr;
@@ -257,19 +265,17 @@ PrimitiveAttrInterface StringAttr::div(PrimitiveAttrInterface& other) const{
 	return nullptr;
 }
 mlir::Operation* StringAttr::toStandard(ConversionPatternRewriter& rewriter,mlir::Location loc) const{
-
-	//mlir::StringType intType = mlir::StringType::get(getContext(), getWidth());
-	//mlir::StringAttr::get();
-	
-	std::vector<int> res;
+	std::vector<uint8_t> res;
 	res.reserve(getWidth());
 	for (IntegerAttr val: getValue()){
-		res.push_back(val.getValue().getZExtValue());
+		res.push_back((uint8_t) val.getValue().getZExtValue());
 	}
-	std::string value {res.begin(),res.end()};
 
-	mlir::StringAttr intAttr = mlir::StringAttr::get(value, getType());
-	return rewriter.create<arith::ConstantOp>(loc,intAttr);
+	mlir::IntegerType intType = mlir::IntegerType::get(getContext(), 8, mlir::IntegerType::Unsigned);
+	mlir::RankedTensorType type = mlir::RankedTensorType::get(getWidth(),intType);
+	mlir::DenseIntElementsAttr intAttr = mlir::DenseIntElementsAttr::get(type,res);
+	auto constOp = rewriter.create<arith::ConstantOp>(loc,intAttr);
+	return rewriter.create<tensor::CastOp>(loc,mlir::RankedTensorType::get(mlir::ShapedType::kDynamic,intType),constOp.getResult());
 }
 std::string StringAttr::getValueStr() const{
 	std::vector<int> res;

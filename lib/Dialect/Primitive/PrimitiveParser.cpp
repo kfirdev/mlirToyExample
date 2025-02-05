@@ -245,12 +245,12 @@ _odsPrinter.printStrippedAttrOrType(getValueAttr());
       return {};
     }
   }
-  ::mlir::FailureOr<llvm::ArrayRef<IntegerAttr>> _result_value;
+  ::mlir::FailureOr<llvm::SmallVector<IntegerAttr>> _result_value;
 
   // Parse variable 'value'
-  _result_value = ::mlir::FieldParser<llvm::ArrayRef<IntegerAttr>>::parse(odsParser);
+  _result_value = ::mlir::FieldParser<llvm::SmallVector<IntegerAttr>>::parse(odsParser);
   if (::mlir::failed(_result_value)) {
-    odsParser.emitError(odsParser.getCurrentLocation(), "failed to parse Prim_StringAttr parameter 'value' which is to be a `llvm::ArrayRef<IntegerAttr>`");
+    odsParser.emitError(odsParser.getCurrentLocation(), "failed to parse Prim_StringAttr parameter 'value' which is to be a `llvm::SmallVector<IntegerAttr>`");
     return {};
   }
   assert(::mlir::succeeded(_result_value));
@@ -265,6 +265,36 @@ void StringAttr::print(::mlir::AsmPrinter &odsPrinter) const {
   //odsPrinter.printStrippedAttrOrType(getValue());
   odsPrinter << getValueStr();
   //odsPrinter << "value";
+}
+
+// StringType
+::mlir::Type StringType::parse(::mlir::AsmParser &odsParser) {
+  ::mlir::Builder odsBuilder(odsParser.getContext());
+  ::llvm::SMLoc odsLoc = odsParser.getCurrentLocation();
+  (void) odsLoc;
+  unsigned _result_width = 1;
+  //::mlir::FailureOr<unsigned> _result_width;
+  // Parse literal '<'
+  //if (odsParser.parseLess()) return {};
+
+  //// Parse variable 'width'
+  //_result_width = ::mlir::FieldParser<unsigned>::parse(odsParser);
+  //if (::mlir::failed(_result_width)) {
+  //  odsParser.emitError(odsParser.getCurrentLocation(), "failed to parse Prim_StringType parameter 'width' which is to be a `unsigned`");
+  //  return {};
+  //}
+  //// Parse literal '>'
+  //if (odsParser.parseGreater()) return {};
+
+  //assert(::mlir::succeeded(_result_width));
+  return StringType::get(odsParser.getContext());
+}
+
+void StringType::print(::mlir::AsmPrinter &odsPrinter) const {
+  ::mlir::Builder odsBuilder(getContext());
+  odsPrinter << "<";
+  odsPrinter.printStrippedAttrOrType(getWidth());
+  odsPrinter << ">";
 }
 
 

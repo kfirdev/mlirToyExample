@@ -48,7 +48,10 @@ def Prim_StringType : Prim_Type<"String","string",[DeclareTypeInterfaceMethods<P
 		string types with a given length.
 	}];
 
+	//let parameters = (ins "unsigned":$width);
 	let parameters = (ins);
+	//let assemblyFormat = "`<` $width `>`";
+	let hasCustomAssemblyFormat = 1;
 
 }
 #endif

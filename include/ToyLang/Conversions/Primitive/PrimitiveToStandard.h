@@ -3,6 +3,7 @@
 #include "mlir/Pass/Pass.h"
 
 #include "mlir/Dialect/Arith/IR/Arith.h"
+#include "mlir/Dialect/Tensor/IR/Tensor.h"
 
 namespace mlir::toylang::primitive{
 

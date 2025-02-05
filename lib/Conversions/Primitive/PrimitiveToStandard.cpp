@@ -27,7 +27,8 @@ struct ConvertAdd : public mlir::OpConversionPattern<AddOp>{
 		: mlir::OpConversionPattern<AddOp>(type_convertor,context){}
 
 	LogicalResult matchAndRewrite(AddOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
-		mlir::Operation* addOp = op.getType().addToStandard(rewriter,op.getLoc(),adaptor.getLhs(),adaptor.getRhs());
+		//mlir::Operation* addOp = op.getType().addToStandard(rewriter,op.getLoc(),adaptor.getLhs(),adaptor.getRhs());
+		mlir::Operation* addOp = op.getType().addToStandard(rewriter,op.getLoc(),adaptor.getOperands());
 		rewriter.replaceOp(op.getOperation(), addOp);
 		return llvm::success();
 	}
