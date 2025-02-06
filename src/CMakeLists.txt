@@ -1,6 +1,10 @@
 get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
 get_property(conversion_libs GLOBAL PROPERTY MLIR_CONVERSION_LIBS)
 
+get_property(dialect_libs_llvm GLOBAL PROPERTY LLVM_LIBS)
+
+message("message" ${dialect_libs_llvm})
+
 set (LIBS
     ${dialect_libs}
     ${conversion_libs}
@@ -8,6 +12,11 @@ set (LIBS
 	MLIRPrinPass
 	MLIRPrim
 	MLIRPrimLowerPass
+	LLVMExecutionEngine
+	MLIRExecutionEngine
+	MLIRExecutionEngineUtils
+	MLIRCAPIExecutionEngine
+	#mlir_c_runner_utils
 )
 
 add_llvm_executable(toy-opt main.cpp)

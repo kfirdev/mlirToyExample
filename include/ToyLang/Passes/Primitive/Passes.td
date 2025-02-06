@@ -11,4 +11,11 @@ def PrintPass : Pass<"print-width"> {
   let dependentDialects = ["mlir::toylang::primitive::PrimitiveDialect"];
 }
 
+def ConcatReplacePass : Pass<"replace-concat"> {
+  let summary = "replace concat";
+  let description = [{
+  replace concat
+  }];
+  let dependentDialects = ["mlir::tensor::TensorDialect"];
+}
 #endif

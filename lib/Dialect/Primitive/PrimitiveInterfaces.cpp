@@ -2,6 +2,7 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveTypes.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
+#include "mlir/Dialect/Tosa/IR/TosaOps.h"
 #include "mlir/IR/ImplicitLocOpBuilder.h"
 #include "mlir/Support/LLVM.h"
 #include "llvm/ADT/SmallVector.h"

@@ -48,5 +48,5 @@ func.func @test_string(%arg0: !primitive.string) -> !primitive.string {
   %2 = primitive.add %0, %1 : !primitive.string
   // CHECK: tensor.concat
   %3 = primitive.add %0, %arg0 : !primitive.string
-  return %2: !primitive.string
+  return %3: !primitive.string
 }
