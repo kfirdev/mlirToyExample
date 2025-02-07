@@ -1,4 +1,5 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveDialect.h"
+#include "include/ToyLang/Dialect/Arrays/ArraysDialect.h"
 #include "include/ToyLang/Conversions/Primitive/PrimitiveToStandard.h"
 #include "include/ToyLang/Passes/Primitive/Passes.h"
 #include "include/ToyLang/Passes/Primitive/PrintPass.h"
@@ -21,6 +22,7 @@ void primitiveToLLVMPipelineBuilder(mlir::OpPassManager &manager){
 int main(int argc, char **argv) {
 	mlir::DialectRegistry registry;
 	registry.insert<mlir::toylang::primitive::PrimitiveDialect>();
+	registry.insert<mlir::toylang::arrays::ArraysDialect>();
 	mlir::registerAllDialects(registry);
 	mlir::registerAllPasses();
 	mlir::toylang::primitive::passes::registerPrintPass();
