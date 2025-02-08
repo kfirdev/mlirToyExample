@@ -83,5 +83,13 @@ llvm::LogicalResult ConcatOp::verify(){
 	return mlir::success();
 }
 
+llvm::LogicalResult ExtractOp::verify(){
+	if (getTensor().getType().getWidth() != getResult().getType().getWidth()){
+		return mlir::failure();
+	}
+
+	return mlir::success();
+}
+
 
 } // namespace mlir::toylang::arrays

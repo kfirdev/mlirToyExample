@@ -24,3 +24,9 @@ func.func @test_concatOp(%arg0: !arrays.intArr<3,10>, %arg1: !arrays.intArr<3,10
   %0 = arrays.concat %arg0, %arg1 : (!arrays.intArr<3,10>, !arrays.intArr<3,10>) -> !arrays.intArr<6,10>
   return %0 : !arrays.intArr<6,10>
 }
+//CHECK-LABEL: test_extractOp
+func.func @test_extractOp(%arg0: !arrays.intArr<3,10>) -> !primitive.int<10> {
+  %idx = index.constant 1
+  %0 = arrays.extract %arg0[%idx] : !arrays.intArr<3,10> -> !primitive.int<10>
+  return %0 : !primitive.int<10>
+}

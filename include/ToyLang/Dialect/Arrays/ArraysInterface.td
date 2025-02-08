@@ -45,7 +45,10 @@ def ArraysTypeInterface : TypeInterface<"ArraysTypeInterface">{
 		"unsigned int", "getLength",(ins)>,
 		InterfaceMethod<
 		"Get type with length of this and another type combined",
-		"mlir::Type", "getCombined",(ins "unsigned":$other_length)>
+		"mlir::Type", "getCombined",(ins "unsigned":$other_length)>,
+		//InterfaceMethod<
+		//"Get inner type",
+		//"mlir::Type", "getCombined",(ins "unsigned":$other_length)>
 	];
 }
 

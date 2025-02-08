@@ -4,7 +4,9 @@
 include "ArraysDialect.td"
 include "ArraysAttr.td"
 include "ArraysType.td"
+include "../Primitive/PrimitiveInterfaces.td"
 include "mlir/IR/OpBase.td"
+include "mlir/IR/BuiltinTypes.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 
@@ -22,6 +24,14 @@ class Array_ArrOpBase<string name, list<Trait> traits = [Pure]> : Op<Arrays_Dial
 
 def Arr_ConcatOp : Array_ArrOpBase<"concat",[Pure,TwoXReusltLength]> {
 	let summary = "concat operation between to arrays";
+	let hasVerifier = 1;
+}
+
+def Arr_ExtractOp : Array_ArrOpBase<"extract"> {
+	let assemblyFormat = "$tensor `[` $indices `]` attr-dict `:` type($tensor) `->` type($output)";
+	let arguments = (ins Builtin_Index:$indices, ArraysTypeInterface:$tensor);
+	let results = (outs PrimitiveTypeInterface:$output);
+	let summary = "extract a value from a given index";
 	let hasVerifier = 1;
 }
 
