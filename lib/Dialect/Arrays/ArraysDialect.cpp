@@ -1,4 +1,5 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveDialect.h"
+#include "include/ToyLang/Dialect/Primitive/PrimitiveOps.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysDialect.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysInterface.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysType.h"
@@ -8,8 +9,11 @@
 
 #include "include/ToyLang/Dialect/Primitive/PrimitiveTypes.h"
 #include "ToyLang/Dialect/Arrays/ArraysDialect.cpp.inc"
+#include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/Support/LLVM.h"
 #include "llvm/ADT/SmallVector.h"
+#include "mlir/Dialect/Index/IR/IndexAttrs.h"
+#include "mlir/Dialect/Index/IR/IndexDialect.h"
 
 #define GET_TYPEDEF_CLASSES
 #include "ToyLang/Dialect/Arrays/ArraysTypes.cpp.inc"
@@ -53,8 +57,8 @@ template <typename T> hash_code hash_value(SmallVector<T> S) {
 }
 
 namespace mlir::toylang::arrays{
-#include "ToyLang/Dialect/Arrays/ArraysAttrInterfaces.cpp.inc"
-#include "ToyLang/Dialect/Arrays/ArraysTypeInterfaces.cpp.inc"
+//#include "ToyLang/Dialect/Arrays/ArraysAttrInterfaces.cpp.inc"
+//#include "ToyLang/Dialect/Arrays/ArraysTypeInterfaces.cpp.inc"
 #include "ToyLang/Dialect/Arrays/ArraysOpInterfaces.cpp.inc"
 
 void ArraysDialect::initialize(){
@@ -102,12 +106,69 @@ llvm::LogicalResult ExtractOp::verify(){
   if (operands.size() <= 1)
     return ::mlir::failure();
 
-  auto Lhs = mlir::dyn_cast<ArraysTypeInterface>(operands[0].getType());
-  auto Rhs = mlir::dyn_cast<ArraysTypeInterface>(operands[1].getType());
+  auto Lhs = mlir::dyn_cast<ArrayType>(operands[0].getType());
+  auto Rhs = mlir::dyn_cast<ArrayType>(operands[1].getType());
   ::mlir::Type odsInferredType0 = ArrayType::get(operands[0].getType().getContext(),Lhs.getLength()+Rhs.getLength(),Lhs.getType());
 
   inferredReturnTypes[0] = odsInferredType0;
   return ::mlir::success();
+}
+
+::mlir::OpFoldResult ConstantOp::fold(ConstantOp::FoldAdaptor adaptor){
+	return adaptor.getValue();
+}
+
+::mlir::OpFoldResult ConcatOp::fold(ConcatOp::FoldAdaptor adaptor){
+	if (adaptor.getRhs() == NULL || adaptor.getLhs() == NULL){
+		return nullptr;
+	}
+
+	auto lhs = mlir::cast<ArrayAttr>(adaptor.getLhs());
+	auto rhs = mlir::cast<ArrayAttr>(adaptor.getRhs());
+	llvm::SmallVector<PrimitiveAttrInterface> arr = lhs.getValue();
+	arr.append(rhs.getValue());
+	return ArrayAttr::get(getContext(),getType(),arr);
+}
+
+::mlir::OpFoldResult ExtractOp::fold(ExtractOp::FoldAdaptor adaptor){
+	if (adaptor.getIndices() == NULL || adaptor.getTensor() == NULL){
+		return nullptr;
+	}
+
+	int idx = mlir::cast<mlir::IntegerAttr>(adaptor.getIndices()).getValue().getZExtValue();
+	auto tensor = mlir::cast<ArrayAttr>(adaptor.getTensor());
+	PrimitiveAttrInterface value = tensor.getValue()[idx];
+	return value;
+}
+::mlir::OpFoldResult InsertOp::fold(InsertOp::FoldAdaptor adaptor){
+	if (adaptor.getIndices() == NULL || adaptor.getDest() == NULL || adaptor.getScalar() == NULL){
+		return nullptr;
+	}
+
+	int idx = mlir::cast<mlir::IntegerAttr>(adaptor.getIndices()).getValue().getZExtValue();
+	auto dest = mlir::cast<ArrayAttr>(adaptor.getDest());
+	auto scalar = mlir::cast<PrimitiveAttrInterface>(adaptor.getScalar());
+
+	llvm::SmallVector<PrimitiveAttrInterface> newArray = dest.getValue();
+	newArray[idx] = scalar;
+
+	return ArrayAttr::get(getContext(),getType(),newArray);
+}
+
+mlir::Operation *ArraysDialect::materializeConstant(::mlir::OpBuilder &builder,
+                                         ::mlir::Attribute value,
+                                         ::mlir::Type type,
+                                         ::mlir::Location loc){
+
+	if (auto val = mlir::dyn_cast<ArrayAttr>(value);val){
+		return builder.create<ConstantOp>(loc,type,val);
+	}
+	if (auto val = mlir::dyn_cast<PrimitiveAttrInterface>(value);val){
+		return builder.create<primitive::ConstantOp>(loc,type,val);
+	}
+
+	return nullptr;
+
 }
 
 } // namespace mlir::toylang::arrays

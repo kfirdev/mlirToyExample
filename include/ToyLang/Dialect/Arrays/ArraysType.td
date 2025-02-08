@@ -10,7 +10,7 @@ class Arr_Type<string name, string typeMnemonic, list<Trait> traits = []> : Type
 	let mnemonic = typeMnemonic;
 }
 
-def Arr_ArrType : Arr_Type<"Array","array", [DeclareTypeInterfaceMethods<ArraysTypeInterface>]> {
+def Arr_ArrType : Arr_Type<"Array","array"> {
 	let summary = "Array type";
 	let description = [{
 		Array type.

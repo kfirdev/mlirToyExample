@@ -9,8 +9,8 @@
 namespace mlir::toylang::arrays{
 	using primitive::PrimitiveTypeInterface;
 
-#include "ToyLang/Dialect/Arrays/ArraysAttrInterfaces.h.inc"
-#include "ToyLang/Dialect/Arrays/ArraysTypeInterfaces.h.inc"
+//#include "ToyLang/Dialect/Arrays/ArraysAttrInterfaces.h.inc"
+//#include "ToyLang/Dialect/Arrays/ArraysTypeInterfaces.h.inc"
 #include "ToyLang/Dialect/Arrays/ArraysOpInterfaces.h.inc"
 
 }

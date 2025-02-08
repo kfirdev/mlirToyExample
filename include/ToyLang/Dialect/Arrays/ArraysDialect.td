@@ -14,7 +14,7 @@ def Arrays_Dialect : Dialect {
 
   let useDefaultAttributePrinterParser = 1;
   let useDefaultTypePrinterParser = 1;
-  //let hasConstantMaterializer = 1;
+  let hasConstantMaterializer = 1;
   let dependentDialects = [
     "mlir::toylang::primitive::PrimitiveDialect",
   ];

@@ -18,22 +18,24 @@ def TwoXReusltLength:  NativeOpTrait<"TwoXReusltLength"> {
 //InferTypeOpInterface
 def Arr_ConcatOp : Op<Arrays_Dialect,"concat",[Pure,TwoXReusltLength,InferTypeOpInterface,DeclareOpInterfaceMethods<ArrayInferTypeInterface>]> {
 	let assemblyFormat = "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)`";
-	let arguments = (ins ArraysTypeInterface:$lhs, ArraysTypeInterface:$rhs);
-	let results = (outs ArraysTypeInterface:$output);
+	let arguments = (ins Arr_ArrType:$lhs, Arr_ArrType:$rhs);
+	let results = (outs Arr_ArrType:$output);
 	let summary = "concat operation between to arrays";
 	let hasVerifier = 1;
+	let hasFolder = 1;
 }
 
 def Arr_ExtractOp : Op<Arrays_Dialect,"extract",[Pure,
 				   TypesMatchWith<"result type matches type of dest",
                    "tensor", "output",
-                   "mlir::cast<ArraysTypeInterface>($_self).getType()">
+                   "mlir::cast<ArrayType>($_self).getType()">
 				   ]> {
 	let assemblyFormat = "$tensor `[` $indices `]` attr-dict `:` type($tensor)";
-	let arguments = (ins Builtin_Index:$indices, ArraysTypeInterface:$tensor);
+	let arguments = (ins Index:$indices, Arr_ArrType:$tensor);
 	let results = (outs PrimitiveTypeInterface:$output);
 	let summary = "extract a value from a given index";
 	let hasVerifier = 1;
+	let hasFolder = 1;
 }
 def Arr_InsertOp : Op<Arrays_Dialect,"insert",[Pure,
 				   TypesMatchWith<"result type matches type of dest",
@@ -41,13 +43,14 @@ def Arr_InsertOp : Op<Arrays_Dialect,"insert",[Pure,
                    "$_self">,
 				   TypesMatchWith<"result type matches type of dest",
                    "dest", "scalar",
-                   "mlir::cast<ArraysTypeInterface>($_self).getType()">
+                   "mlir::cast<ArrayType>($_self).getType()">
 				   ]> {
 	let assemblyFormat = "$scalar `into` $dest `[` $indices `]` attr-dict `:` type($dest)";
-	let arguments = (ins Builtin_Index:$indices, PrimitiveTypeInterface:$scalar,ArraysTypeInterface:$dest);
-	let results = (outs ArraysTypeInterface:$result);
+	let arguments = (ins Builtin_Index:$indices, PrimitiveTypeInterface:$scalar,Arr_ArrType:$dest);
+	let results = (outs Arr_ArrType:$result);
 	let summary = "extract a value from a given index";
 	//let hasVerifier = 1;
+	let hasFolder = 1;
 }
 
 def Attr_ConstantOp : Op<Arrays_Dialect, "constant", [Pure, ConstantLike]> {
@@ -57,7 +60,7 @@ def Attr_ConstantOp : Op<Arrays_Dialect, "constant", [Pure, ConstantLike]> {
 	let hasCustomAssemblyFormat = 1;
 
 	//let hasVerifier = 1;
-	//let hasFolder = 1;
+	let hasFolder = 1;
 }
 
 #endif
