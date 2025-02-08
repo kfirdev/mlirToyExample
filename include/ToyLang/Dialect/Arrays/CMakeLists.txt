@@ -18,4 +18,7 @@ mlir_tablegen(ArraysAttrInterfaces.cpp.inc -gen-attr-interface-defs)
 
 mlir_tablegen(ArraysTypeInterfaces.h.inc -gen-type-interface-decls)
 mlir_tablegen(ArraysTypeInterfaces.cpp.inc -gen-type-interface-defs)
+
+mlir_tablegen(ArraysOpInterfaces.h.inc -gen-op-interface-decls)
+mlir_tablegen(ArraysOpInterfaces.cpp.inc -gen-op-interface-defs)
 add_public_tablegen_target(MLIRArrInterfaceIncGen)

@@ -55,6 +55,7 @@ template <typename T> hash_code hash_value(SmallVector<T> S) {
 namespace mlir::toylang::arrays{
 #include "ToyLang/Dialect/Arrays/ArraysAttrInterfaces.cpp.inc"
 #include "ToyLang/Dialect/Arrays/ArraysTypeInterfaces.cpp.inc"
+#include "ToyLang/Dialect/Arrays/ArraysOpInterfaces.cpp.inc"
 
 void ArraysDialect::initialize(){
 	addTypes<
@@ -92,9 +93,21 @@ llvm::LogicalResult ExtractOp::verify(){
 	if (getTensor().getType().getType() != getResult().getType()){
 		 return emitOpError() << "all types must be equal";
 	}
-
 	return mlir::success();
 }
 
+::llvm::LogicalResult ConcatOp::inferReturnTypes(::mlir::MLIRContext *context, ::std::optional<::mlir::Location> location, ::mlir::ValueRange operands, ::mlir::DictionaryAttr attributes, ::mlir::OpaqueProperties properties, ::mlir::RegionRange regions, ::llvm::SmallVectorImpl<::mlir::Type>&inferredReturnTypes) {
+  inferredReturnTypes.resize(1);
+  ::mlir::Builder odsBuilder(context);
+  if (operands.size() <= 1)
+    return ::mlir::failure();
+
+  auto Lhs = mlir::dyn_cast<ArraysTypeInterface>(operands[0].getType());
+  auto Rhs = mlir::dyn_cast<ArraysTypeInterface>(operands[1].getType());
+  ::mlir::Type odsInferredType0 = ArrayType::get(operands[0].getType().getContext(),Lhs.getLength()+Rhs.getLength(),Lhs.getType());
+
+  inferredReturnTypes[0] = odsInferredType0;
+  return ::mlir::success();
+}
 
 } // namespace mlir::toylang::arrays

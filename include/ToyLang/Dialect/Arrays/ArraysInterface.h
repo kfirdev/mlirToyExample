@@ -11,5 +11,6 @@ namespace mlir::toylang::arrays{
 
 #include "ToyLang/Dialect/Arrays/ArraysAttrInterfaces.h.inc"
 #include "ToyLang/Dialect/Arrays/ArraysTypeInterfaces.h.inc"
+#include "ToyLang/Dialect/Arrays/ArraysOpInterfaces.h.inc"
 
 }

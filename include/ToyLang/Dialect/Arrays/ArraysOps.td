@@ -4,6 +4,7 @@
 include "ArraysDialect.td"
 include "ArraysAttr.td"
 include "ArraysType.td"
+include "ArraysInterface.td"
 include "../Primitive/PrimitiveInterfaces.td"
 include "mlir/IR/OpBase.td"
 include "mlir/IR/BuiltinTypes.td"
@@ -14,25 +15,39 @@ def TwoXReusltLength:  NativeOpTrait<"TwoXReusltLength"> {
   let cppNamespace = "::mlir::toylang::arrays";
 }
 
-class Array_ArrOpBase<string name, list<Trait> traits = [Pure]> : Op<Arrays_Dialect, name, traits>{
-	let assemblyFormat = "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)` `->` type($output)";
+//InferTypeOpInterface
+def Arr_ConcatOp : Op<Arrays_Dialect,"concat",[Pure,TwoXReusltLength,InferTypeOpInterface,DeclareOpInterfaceMethods<ArrayInferTypeInterface>]> {
+	let assemblyFormat = "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)`";
 	let arguments = (ins ArraysTypeInterface:$lhs, ArraysTypeInterface:$rhs);
 	let results = (outs ArraysTypeInterface:$output);
-	//let hasFolder = 1;
-	//let hasVerifier = 1;
-}
-
-def Arr_ConcatOp : Array_ArrOpBase<"concat",[Pure,TwoXReusltLength]> {
 	let summary = "concat operation between to arrays";
 	let hasVerifier = 1;
 }
 
-def Arr_ExtractOp : Array_ArrOpBase<"extract"> {
-	let assemblyFormat = "$tensor `[` $indices `]` attr-dict `:` type($tensor) `->` type($output)";
+def Arr_ExtractOp : Op<Arrays_Dialect,"extract",[Pure,
+				   TypesMatchWith<"result type matches type of dest",
+                   "tensor", "output",
+                   "mlir::cast<ArraysTypeInterface>($_self).getType()">
+				   ]> {
+	let assemblyFormat = "$tensor `[` $indices `]` attr-dict `:` type($tensor)";
 	let arguments = (ins Builtin_Index:$indices, ArraysTypeInterface:$tensor);
 	let results = (outs PrimitiveTypeInterface:$output);
 	let summary = "extract a value from a given index";
 	let hasVerifier = 1;
+}
+def Arr_InsertOp : Op<Arrays_Dialect,"insert",[Pure,
+				   TypesMatchWith<"result type matches type of dest",
+                   "dest", "result",
+                   "$_self">,
+				   TypesMatchWith<"result type matches type of dest",
+                   "dest", "scalar",
+                   "mlir::cast<ArraysTypeInterface>($_self).getType()">
+				   ]> {
+	let assemblyFormat = "$scalar `into` $dest `[` $indices `]` attr-dict `:` type($dest)";
+	let arguments = (ins Builtin_Index:$indices, PrimitiveTypeInterface:$scalar,ArraysTypeInterface:$dest);
+	let results = (outs ArraysTypeInterface:$result);
+	let summary = "extract a value from a given index";
+	//let hasVerifier = 1;
 }
 
 def Attr_ConstantOp : Op<Arrays_Dialect, "constant", [Pure, ConstantLike]> {
