@@ -10,9 +10,5 @@
 #include "mlir/IR/BuiltinTypes.h"  // from @llvm-project
 #include "mlir/IR/Dialect.h"
 
-namespace mlir::toylang::arrays{
-	using primitive::PrimitiveTypeInterface;
-}
-
 #define GET_OP_CLASSES
 #include "ToyLang/Dialect/Arrays/ArraysOps.h.inc"

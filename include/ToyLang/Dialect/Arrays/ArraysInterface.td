@@ -38,14 +38,14 @@ def ArraysTypeInterface : TypeInterface<"ArraysTypeInterface">{
 	}];
 	let methods = [
 		InterfaceMethod<
-		"Get the width of the value",
-		"unsigned", "getWidth",(ins)>,
+		"Get the type of the value",
+		"PrimitiveTypeInterface", "getType",(ins)>,
 		InterfaceMethod<
 		"Get the length of the array",
 		"unsigned int", "getLength",(ins)>,
-		InterfaceMethod<
-		"Get type with length of this and another type combined",
-		"mlir::Type", "getCombined",(ins "unsigned":$other_length)>,
+		//InterfaceMethod<
+		//"Get type with length of this and another type combined",
+		//"mlir::Type", "getCombined",(ins "unsigned":$other_length)>,
 		//InterfaceMethod<
 		//"Get inner type",
 		//"mlir::Type", "getCombined",(ins "unsigned":$other_length)>

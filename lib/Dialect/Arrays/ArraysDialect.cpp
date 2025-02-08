@@ -1,8 +1,8 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveDialect.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysDialect.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysInterface.h"
-#include "include/ToyLang/Dialect/Arrays/ArraysAttr.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysType.h"
+#include "include/ToyLang/Dialect/Arrays/ArraysAttr.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysOps.h"
 #include "llvm/ADT/TypeSwitch.h"
 
@@ -77,15 +77,20 @@ llvm::LogicalResult ConcatOp::verify(){
 	if (getRhs().getType().getLength() + getLhs().getType().getLength() != getResult().getType().getLength()){
 		 return emitOpError() << "Result length should have the length of both rhs and lhs combined";
 	}
-	if (getRhs().getType().getWidth() == getLhs().getType().getWidth() && getLhs().getType().getWidth() == getResult().getType().getLength()){
+	if (getRhs().getType().getType().getWidth() != getLhs().getType().getType().getWidth() 
+			|| getLhs().getType().getType().getWidth() != getResult().getType().getType().getWidth()
+			|| getRhs().getType().getType().getWidth() != getResult().getType().getType().getWidth()){
 		 return emitOpError() << "all widths must be equal";
+	}
+	if (getRhs().getType() != getLhs().getType()){
+		 return emitOpError() << "all input types must be equal";
 	}
 	return mlir::success();
 }
 
 llvm::LogicalResult ExtractOp::verify(){
-	if (getTensor().getType().getWidth() != getResult().getType().getWidth()){
-		return mlir::failure();
+	if (getTensor().getType().getType() != getResult().getType()){
+		 return emitOpError() << "all types must be equal";
 	}
 
 	return mlir::success();

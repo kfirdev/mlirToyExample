@@ -13,7 +13,8 @@ class TwoXReusltLength : public OpTrait::TraitBase<ConcreteType, TwoXReusltLengt
 	  auto Lhs = mlir::dyn_cast<ArraysTypeInterface>(op->getOperandTypes()[0]);
 	  auto Rhs = mlir::dyn_cast<ArraysTypeInterface>(op->getOperandTypes()[1]);
 	  auto Reuslt = mlir::dyn_cast<ArraysTypeInterface>(op->getResultTypes()[0]);
-	  op->getResults()[0].setType(Lhs.getCombined(Rhs.getLength()));
+	  auto new_type = ArrayType::get(op->getContext(),Lhs.getLength()+Rhs.getLength(),Lhs.getType());
+	  op->getResults()[0].setType(new_type);
 
     return success();
   }

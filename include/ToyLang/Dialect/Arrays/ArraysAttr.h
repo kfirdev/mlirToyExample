@@ -8,5 +8,9 @@
 //#include "mlir/IR/BuiltinTypes.h"  // from @llvm-project
 //#include "mlir/IR/Dialect.h"
 
+namespace mlir::toylang::arrays{
+	using primitive::PrimitiveAttrInterface;
+}
+
 #define GET_ATTRDEF_CLASSES
 #include "ToyLang/Dialect/Arrays/ArraysAttr.h.inc"

@@ -1,3 +1,4 @@
+#include "ToyLang/Dialect/Primitive/PrimitiveInterfaces.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysDialect.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysOps.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysAttr.h"
@@ -42,10 +43,10 @@ namespace mlir::toylang::arrays{
 	unsigned width;
 	unsigned length;
 	{
-		IntegerArrType type;
+		ArrayType type;
 		if (parser.parseCustomTypeWithFallback(type))
 			return ::mlir::failure();
-		width = type.getWidth();
+		width = type.getType().getWidth();
 		length = type.getLength();
 		outputRawType = type;
 	}
@@ -57,14 +58,14 @@ namespace mlir::toylang::arrays{
 		return parser.emitError(parser.getCurrentLocation()) << "bit width ( " << width 
 			<< " ) is too small use a bit width of at least: " << max_width;
 	}
-	llvm::SmallVector<primitive::IntegerAttr> final_array;
+	llvm::SmallVector<primitive::PrimitiveAttrInterface> final_array;
 	final_array.reserve(arr.size());
 	auto tp = primitive::IntegerType::get(parser.getContext(),width);
 	for (llvm::APInt val: arr){
 		final_array.push_back(std::move(primitive::IntegerAttr::get(tp,val.sext(width))));
 	}
 
-	attr = IntegerArrAttr::get(parser.getContext(),outputRawType,final_array);
+	attr = ArrayAttr::get(parser.getContext(),outputRawType,final_array);
 	return mlir::success();
 }
 //===----------------------------------------------------------------------===//
@@ -113,10 +114,10 @@ llvm::APFloat parseFloatValue(double &floatValue,unsigned width){
 	unsigned width;
 	unsigned length;
 	{
-		FloatArrType type;
+		ArrayType type;
 		if (parser.parseCustomTypeWithFallback(type))
 			return ::mlir::failure();
-		width = type.getWidth();
+		width = type.getType().getWidth();
 		length = type.getLength();
 		outputRawType = type;
 	}
@@ -127,14 +128,14 @@ llvm::APFloat parseFloatValue(double &floatValue,unsigned width){
 	if (width != 16 && width != 32 && width != 64){
         return parser.emitError(parser.getCurrentLocation()) << "can't use this width chose between 16,32,64";
 	}
-	llvm::SmallVector<primitive::FloatAttr> final_array;
+	llvm::SmallVector<primitive::PrimitiveAttrInterface> final_array;
 	final_array.reserve(arr.size());
 	auto tp = primitive::FloatType::get(parser.getContext(),width);
 	for (double val: arr){
 		final_array.push_back(std::move(primitive::FloatAttr::get(tp,parseFloatValue(val,width))));
 	}
 
-	attr = FloatArrAttr::get(parser.getContext(),outputRawType,final_array);
+	attr = ArrayAttr::get(parser.getContext(),outputRawType,final_array);
 	return mlir::success();
 }
 //===----------------------------------------------------------------------===//
@@ -178,7 +179,7 @@ llvm::APFloat parseFloatValue(double &floatValue,unsigned width){
 
 	unsigned length;
 	{
-		BoolArrType type;
+		ArrayType type;
 		if (parser.parseCustomTypeWithFallback(type))
 			return ::mlir::failure();
 		length = type.getLength();
@@ -188,14 +189,14 @@ llvm::APFloat parseFloatValue(double &floatValue,unsigned width){
 	if (length != arr.size()){
         return parser.emitError(parser.getCurrentLocation()) << "length should be: " << length;
 	}
-	llvm::SmallVector<primitive::BoolAttr> final_array;
+	llvm::SmallVector<primitive::PrimitiveAttrInterface> final_array;
 	final_array.reserve(arr.size());
 	auto tp = primitive::BoolType::get(parser.getContext());
 	for (bool val: arr){
 		final_array.push_back(std::move(primitive::BoolAttr::get(tp,val)));
 	}
 
-	attr = BoolArrAttr::get(parser.getContext(),outputRawType,final_array);
+	attr = ArrayAttr::get(parser.getContext(),outputRawType,final_array);
 	return mlir::success();
 }
 
@@ -292,10 +293,10 @@ _odsPrinter.printStrippedAttrOrType(getValueAttr());
 }
 
 //===----------------------------------------------------------------------===//
-// IntegerArrAttr parsing 
+// ArrAttr parsing 
 //===----------------------------------------------------------------------===//
 
-::mlir::Attribute IntegerArrAttr::parse(::mlir::AsmParser &odsParser, ::mlir::Type odsType) {
+::mlir::Attribute ArrayAttr::parse(::mlir::AsmParser &odsParser, ::mlir::Type odsType) {
   ::mlir::Builder odsBuilder(odsParser.getContext());
   ::llvm::SMLoc odsLoc = odsParser.getCurrentLocation();
   (void) odsLoc;
@@ -309,21 +310,21 @@ _odsPrinter.printStrippedAttrOrType(getValueAttr());
       return {};
     }
   }
-  ::mlir::FailureOr<llvm::SmallVector<primitive::IntegerAttr>> _result_value;
+  ::mlir::FailureOr<llvm::SmallVector<primitive::PrimitiveAttrInterface>> _result_value;
 
   // Parse variable 'value'
-  _result_value = ::mlir::FieldParser<llvm::SmallVector<primitive::IntegerAttr>>::parse(odsParser);
+  _result_value = ::mlir::FieldParser<llvm::SmallVector<primitive::PrimitiveAttrInterface>>::parse(odsParser);
   if (::mlir::failed(_result_value)) {
-    odsParser.emitError(odsParser.getCurrentLocation(), "failed to parse Arr_IntegerArrAttr parameter 'value' which is to be a `llvm::SmallVector<primitive::IntegerAttr>`");
+    odsParser.emitError(odsParser.getCurrentLocation(), "failed to parse Arr_IntegerArrAttr parameter 'value' which is to be a `llvm::SmallVector<primitive::PrimitiveAttrInterface>`");
     return {};
   }
   assert(::mlir::succeeded(_result_value));
-  return IntegerArrAttr::get(odsParser.getContext(),
+  return ArrayAttr::get(odsParser.getContext(),
       ::mlir::Type((_result_type.value_or(::mlir::NoneType::get(odsParser.getContext())))),
-      llvm::SmallVector<primitive::IntegerAttr>((*_result_value)));
+      llvm::SmallVector<primitive::PrimitiveAttrInterface>((*_result_value)));
 }
 
-void IntegerArrAttr::print(::mlir::AsmPrinter &odsPrinter) const {
+void ArrayAttr::print(::mlir::AsmPrinter &odsPrinter) const {
   ::mlir::Builder odsBuilder(getContext());
   odsPrinter << '[';
   for (int i = 0; i < getValue().size(); ++i){
@@ -333,97 +334,6 @@ void IntegerArrAttr::print(::mlir::AsmPrinter &odsPrinter) const {
 	  }
   }
   odsPrinter << ']';
-  //odsPrinter.printStrippedAttrOrType(getValue());
-}
-
-//===----------------------------------------------------------------------===//
-// FloatArrAttr parsing
-//===----------------------------------------------------------------------===//
-
-::mlir::Attribute FloatArrAttr::parse(::mlir::AsmParser &odsParser, ::mlir::Type odsType) {
-  ::mlir::Builder odsBuilder(odsParser.getContext());
-  ::llvm::SMLoc odsLoc = odsParser.getCurrentLocation();
-  (void) odsLoc;
-  ::mlir::FailureOr<::mlir::Type> _result_type;
-
-  if (odsType) {
-    if (auto reqType = ::llvm::dyn_cast<::mlir::Type>(odsType)) {
-      _result_type = reqType;
-    } else {
-      odsParser.emitError(odsLoc, "invalid kind of type specified");
-      return {};
-    }
-  }
-  ::mlir::FailureOr<llvm::SmallVector<primitive::FloatAttr>> _result_value;
-
-  // Parse variable 'value'
-  _result_value = ::mlir::FieldParser<llvm::SmallVector<primitive::FloatAttr>>::parse(odsParser);
-  if (::mlir::failed(_result_value)) {
-    odsParser.emitError(odsParser.getCurrentLocation(), "failed to parse Arr_FloatArrAttr parameter 'value' which is to be a `llvm::SmallVector<primitive::FloatAttr>`");
-    return {};
-  }
-  assert(::mlir::succeeded(_result_value));
-  return FloatArrAttr::get(odsParser.getContext(),
-      ::mlir::Type((_result_type.value_or(::mlir::NoneType::get(odsParser.getContext())))),
-      llvm::SmallVector<primitive::FloatAttr>((*_result_value)));
-}
-
-void FloatArrAttr::print(::mlir::AsmPrinter &odsPrinter) const {
-  ::mlir::Builder odsBuilder(getContext());
-  odsPrinter << '[';
-  for (int i = 0; i < getValue().size(); ++i){
-	  odsPrinter << getValue()[i].getValueStr() ;
-	  if (i < getValue().size()-1){
-		odsPrinter << ',';
-	  }
-  }
-  odsPrinter << ']';
-  //odsPrinter.printStrippedAttrOrType(getValue());
-}
-
-//===----------------------------------------------------------------------===//
-// BoolArrAttr parsing 
-//===----------------------------------------------------------------------===//
-
-::mlir::Attribute BoolArrAttr::parse(::mlir::AsmParser &odsParser, ::mlir::Type odsType) {
-  ::mlir::Builder odsBuilder(odsParser.getContext());
-  ::llvm::SMLoc odsLoc = odsParser.getCurrentLocation();
-  (void) odsLoc;
-  ::mlir::FailureOr<::mlir::Type> _result_type;
-
-  if (odsType) {
-    if (auto reqType = ::llvm::dyn_cast<::mlir::Type>(odsType)) {
-      _result_type = reqType;
-    } else {
-      odsParser.emitError(odsLoc, "invalid kind of type specified");
-      return {};
-    }
-  }
-  ::mlir::FailureOr<llvm::SmallVector<primitive::BoolAttr>> _result_value;
-
-  // Parse variable 'value'
-  _result_value = ::mlir::FieldParser<llvm::SmallVector<primitive::BoolAttr>>::parse(odsParser);
-  if (::mlir::failed(_result_value)) {
-    odsParser.emitError(odsParser.getCurrentLocation(), "failed to parse Arr_BoolArrAttr parameter 'value' which is to be a `llvm::SmallVector<primitive::BoolAttr>`");
-    return {};
-  }
-  assert(::mlir::succeeded(_result_value));
-  return BoolArrAttr::get(odsParser.getContext(),
-      ::mlir::Type((_result_type.value_or(::mlir::NoneType::get(odsParser.getContext())))),
-      llvm::SmallVector<primitive::BoolAttr>((*_result_value)));
-}
-
-void BoolArrAttr::print(::mlir::AsmPrinter &odsPrinter) const {
-  ::mlir::Builder odsBuilder(getContext());
-  odsPrinter << '[';
-  for (int i = 0; i < getValue().size(); ++i){
-	  odsPrinter << getValue()[i].getValueStr() ;
-	  if (i < getValue().size()-1){
-		odsPrinter << ',';
-	  }
-  }
-  odsPrinter << ']';
-  //odsPrinter.printStrippedAttrOrType(getValue());
 }
 
 } //namespace mlir::toylang::arrays
