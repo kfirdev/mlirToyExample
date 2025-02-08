@@ -1,5 +1,6 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveDialect.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysDialect.h"
+#include "include/ToyLang/Dialect/Arrays/ArraysInterface.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysAttr.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysType.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysOps.h"
@@ -7,6 +8,7 @@
 
 #include "include/ToyLang/Dialect/Primitive/PrimitiveTypes.h"
 #include "ToyLang/Dialect/Arrays/ArraysDialect.cpp.inc"
+#include "mlir/Support/LLVM.h"
 #include "llvm/ADT/SmallVector.h"
 
 #define GET_TYPEDEF_CLASSES
@@ -51,7 +53,8 @@ template <typename T> hash_code hash_value(SmallVector<T> S) {
 }
 
 namespace mlir::toylang::arrays{
-
+#include "ToyLang/Dialect/Arrays/ArraysAttrInterfaces.cpp.inc"
+#include "ToyLang/Dialect/Arrays/ArraysTypeInterfaces.cpp.inc"
 
 void ArraysDialect::initialize(){
 	addTypes<
@@ -69,5 +72,16 @@ void ArraysDialect::initialize(){
 	#include "ToyLang/Dialect/Arrays/ArraysAttr.cpp.inc"
 		>();
 }
+
+llvm::LogicalResult ConcatOp::verify(){
+	if (getRhs().getType().getLength() + getLhs().getType().getLength() != getResult().getType().getLength()){
+		 return emitOpError() << "Result length should have the length of both rhs and lhs combined";
+	}
+	if (getRhs().getType().getWidth() == getLhs().getType().getWidth() && getLhs().getType().getWidth() == getResult().getType().getLength()){
+		 return emitOpError() << "all widths must be equal";
+	}
+	return mlir::success();
+}
+
 
 } // namespace mlir::toylang::arrays
