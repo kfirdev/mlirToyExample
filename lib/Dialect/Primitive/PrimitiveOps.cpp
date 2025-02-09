@@ -26,7 +26,7 @@ mlir::LogicalResult ConstantOp::verify(){
 }
 
 mlir::LogicalResult AddOp::verify(){
-	//llvm::errs() << getResult() << "\n";
+	//llvm::errs() << getRhs().getType().getWidth() << "\n";
 	if (getResult().getType().hasTrait<IsABool>()) {
 		 return emitOpError() << "cannot be applied to type " << getType(); 
 	}
