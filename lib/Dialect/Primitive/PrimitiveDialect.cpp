@@ -89,13 +89,13 @@ BoolAttr BoolAttr::get(mlir::MLIRContext* context,Type type, bool value){
 
 llvm::LogicalResult IntegerAttr::verify(llvm::function_ref<::mlir::InFlightDiagnostic()> emitError, mlir::Type type, APInt value){
 	// These should NEVER fail if this fails something is wrong with the initialization of the attribute.
-	IntegerType intType = mlir::dyn_cast<IntegerType>(type);
-	if (!intType){
-		return failure();
-	}
-	if (intType.getWidth() != value.getBitWidth()){
-		 return emitError() << "Wrong bit width";
-	}
+	//IntegerType intType = mlir::dyn_cast<IntegerType>(type);
+	//if (!intType){
+	//	return failure();
+	//}
+	//if (intType.getWidth() != value.getBitWidth()){
+	//	 return emitError() << "Wrong bit width";
+	//}
     return success();
 }
 

@@ -69,8 +69,28 @@ struct ConvertConstant : public mlir::OpConversionPattern<ConstantOp>{
 		: mlir::OpConversionPattern<ConstantOp>(type_convertor,context){}
 
 	LogicalResult matchAndRewrite(ConstantOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
-		mlir::Operation* constOp = op.getValue().toStandard(rewriter,op.getLoc());
-		rewriter.replaceOp(op.getOperation(), constOp);
+		mlir::TypedAttr Attr = op.getValue().toStandard();
+		arith::ConstantOp constOp = rewriter.create<arith::ConstantOp>(op.getLoc(),Attr);
+		rewriter.replaceOp(op.getOperation(), constOp.getOperation());
+		return llvm::success();
+	}
+};
+
+struct ConvertToStandard : public mlir::OpConversionPattern<ToStandardOp>{
+	ConvertToStandard(mlir::TypeConverter& type_convertor, MLIRContext* context) 
+		: mlir::OpConversionPattern<ToStandardOp>(type_convertor,context){}
+
+	LogicalResult matchAndRewrite(ToStandardOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		rewriter.replaceOp(op.getOperation(),op.getOperand());
+		return llvm::success();
+	}
+};
+struct ConvertFromStandard : public mlir::OpConversionPattern<FromStandardOp>{
+	ConvertFromStandard(mlir::TypeConverter& type_convertor, MLIRContext* context) 
+		: mlir::OpConversionPattern<FromStandardOp>(type_convertor,context){}
+
+	LogicalResult matchAndRewrite(FromStandardOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		rewriter.replaceOp(op.getOperation(),op.getOperand());
 		return llvm::success();
 	}
 };
@@ -91,6 +111,8 @@ struct PrimToStandard : impl::PrimToStandardBase<PrimToStandard> {
 	patterns.add<ConvertSub>(type_convertor,context);
 	patterns.add<ConvertMult>(type_convertor,context);
 	patterns.add<ConvertDiv>(type_convertor,context);
+	patterns.add<ConvertToStandard>(type_convertor,context);
+	patterns.add<ConvertFromStandard>(type_convertor,context);
 	patterns.add<ConvertConstant>(type_convertor,context);
 
 	populateFunctionOpInterfaceTypeConversionPattern<mlir::func::FuncOp>(

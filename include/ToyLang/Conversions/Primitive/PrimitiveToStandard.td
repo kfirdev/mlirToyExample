@@ -7,7 +7,7 @@ def PrimToStandard : Pass<"primitive-to-standard"> {
   let summary = "Lower `primitive` to standard MLIR dialects.";
 
   let description = [{
-    This pass lowers the `primitive` dialect to standard MLIR, arith for now...
+    This pass lowers the `primitive` dialect to standard MLIR
   }];
   let dependentDialects = [
     "mlir::arith::ArithDialect",

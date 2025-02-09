@@ -31,7 +31,7 @@ def PrimitiveAttrInterface : AttrInterface<"PrimitiveAttrInterface">{
 		"PrimitiveAttrInterface", "div",(ins "PrimitiveAttrInterface&":$other)>,
 		InterfaceMethod<
 		"Convert to standard",
-		"mlir::Operation*", "toStandard",(ins "ConversionPatternRewriter&":$rewriter, "mlir::Location":$loc)>,
+		"mlir::TypedAttr", "toStandard",(ins)>,
 	];
 
 

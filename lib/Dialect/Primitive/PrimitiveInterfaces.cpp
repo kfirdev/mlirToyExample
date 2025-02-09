@@ -42,13 +42,13 @@ PrimitiveAttrInterface IntegerAttr::div(PrimitiveAttrInterface& other) const{
 	auto intAttr = mlir::cast<IntegerAttr>(other);
 	return IntegerAttr::get(getType(),getValue().sdiv(intAttr.getValue()));
 }
-mlir::Operation* IntegerAttr::toStandard(ConversionPatternRewriter& rewriter,mlir::Location loc) const{
+mlir::TypedAttr IntegerAttr::toStandard() const{
 
-	mlir::IntegerType intType = mlir::IntegerType::get(getContext(), getWidth());
+	mlir::IntegerType intType = mlir::IntegerType::get(getContext(), getWidth(),mlir::IntegerType::Signless);
 	mlir::IntegerAttr intAttr = mlir::IntegerAttr::get(intType, getValue());
 
 	
-	return rewriter.create<arith::ConstantOp>(loc,intAttr);
+	return intAttr;
 }
 std::string IntegerAttr::getValueStr() const{
 	std::string valueStr;
@@ -119,13 +119,22 @@ PrimitiveAttrInterface FloatAttr::div(PrimitiveAttrInterface& other) const{
 	auto _ = result.divide(floatAttr.getValue(),llvm::RoundingMode::NearestTiesToAway);
 	return FloatAttr::get(getType(),result);
 }
-mlir::Operation* FloatAttr::toStandard(ConversionPatternRewriter& rewriter,mlir::Location loc) const{
+mlir::TypedAttr FloatAttr::toStandard() const{
 
-	//mlir::FloatType intType = mlir::Float32Type;
-	mlir::FloatAttr intAttr = mlir::FloatAttr::get(mlir::Float32Type{}, getValue());
+	mlir::Type type;
+	switch(getWidth()){
+		case 16:
+			type = mlir::Float16Type::get(getContext());
+		case 32:
+			type = mlir::Float32Type::get(getContext());
+		case 64:
+			type = mlir::Float64Type::get(getContext());
+		default:
+			type = mlir::Float64Type::get(getContext());
+	}
 
-	
-	return rewriter.create<arith::ConstantOp>(loc,intAttr);
+	mlir::FloatAttr intAttr = mlir::FloatAttr::get(type,getValue());
+	return intAttr;
 }
 std::string FloatAttr::getValueStr() const{
 	std::string valueStr;
@@ -168,9 +177,10 @@ PrimitiveAttrInterface BoolAttr::mult(PrimitiveAttrInterface& other) const{
 	auto intAttr = mlir::cast<BoolAttr>(other);
 	return BoolAttr::get(getType(),getValue() && intAttr.getValue());
 }
-mlir::Operation* BoolAttr::toStandard(ConversionPatternRewriter& rewriter,mlir::Location loc) const{
+mlir::TypedAttr BoolAttr::toStandard() const{
 	mlir::BoolAttr intAttr = mlir::BoolAttr::get(getContext(), getValue());
-	return rewriter.create<arith::ConstantOp>(loc,intAttr);
+	//return rewriter.create<arith::ConstantOp>(loc,intAttr);
+	return intAttr;
 }
 std::string BoolAttr::getValueStr() const{
 	return getValue() ? "true" : "false";
