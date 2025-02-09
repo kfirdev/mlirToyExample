@@ -37,7 +37,7 @@ def Arr_ExtractOp : Op<Arrays_Dialect,"extract",[Pure,
 	let hasVerifier = 1;
 	let hasFolder = 1;
 }
-def Arr_InsertOp : Op<Arrays_Dialect,"insert",[Pure,
+def Arr_InsertOp : Op<Arrays_Dialect,"insert",[
 				   TypesMatchWith<"result type matches type of dest",
                    "dest", "result",
                    "$_self">,
@@ -55,8 +55,8 @@ def Arr_InsertOp : Op<Arrays_Dialect,"insert",[Pure,
 
 def Attr_ConstantOp : Op<Arrays_Dialect, "constant", [Pure, ConstantLike]> {
 	let	summary = "Define a constnat int";
-	let arguments = (ins AnyAttr:$value);
-	let results = (outs AnyType:$output);
+	let arguments = (ins Arr_ArrAttr:$value);
+	let results = (outs Arr_ArrType:$output);
 	let hasCustomAssemblyFormat = 1;
 
 	//let hasVerifier = 1;

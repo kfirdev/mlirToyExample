@@ -33,6 +33,21 @@ def PrimInt_DivOp : Primitve_IntOpBase<"div"> {
 	let summary = "Addition operation between to ints";
 }
 
+def Prim_FromStandardOp : Op<Primitive_Dialect, "from_standard", [Pure]> {
+  let summary = "Creates a Primitive type from standard type";
+  let arguments = (ins AnyTypeOf<[AnyInteger,AnyFloat]>:$input);
+  let results = (outs PrimitiveTypeInterface:$output);
+  let assemblyFormat = "$input attr-dict `:` type($input) `->` qualified(type($output))";
+  //let hasFolder = 1;
+}
+
+def Prim_ToStandardOp : Op<Primitive_Dialect, "to_standard", [Pure]> {
+  let summary = "Converts a Primitive type to standard";
+  let arguments = (ins PrimitiveTypeInterface:$input);
+  let results = (outs AnyTypeOf<[AnyInteger,AnyFloat]>:$output);
+  let assemblyFormat = "$input attr-dict `:` qualified(type($input)) `->` type($output)";
+}
+
 def PrimInt_ConstantOp : Op<Primitive_Dialect, "constant", [Pure, ConstantLike]> {
 	let	summary = "Define a constnat int";
 	//let arguments = (ins Prim_IntegerAttr:$value);

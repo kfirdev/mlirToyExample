@@ -250,8 +250,8 @@ llvm::APFloat parseFloatValue(double &floatValue,unsigned width){
 // ConstantOp parsing
 //===----------------------------------------------------------------------===//
 ::mlir::ParseResult ConstantOp::parse(::mlir::OpAsmParser &parser, ::mlir::OperationState &result) {
-  mlir::Attribute valueAttr;
-  mlir::Type outputRawType{};
+  ArrayAttr valueAttr;
+  ArrayType outputRawType{};
   ::llvm::ArrayRef<::mlir::Type> outputTypes(&outputRawType, 1);
 
   if (parseOptionalArray(parser,valueAttr,outputRawType)){

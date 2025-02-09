@@ -99,5 +99,9 @@ mlir::OpFoldResult DivOp::fold(DivOp::FoldAdaptor adaptor){
 	auto rhs = mlir::cast<PrimitiveAttrInterface>(adaptor.getOperands()[1]);
 	return lhs.div(rhs);
 }
+//mlir::OpFoldResult FromStandardOp::fold(FromStandardOp::FoldAdaptor adaptor) {
+//  // Returns null if the cast failed, which corresponds to a failed fold.
+//  return dyn_cast_or_null<DenseIntElementsAttr>(adaptor.getInput());
+//}
 
 }// namespace mlir::toylang::primitive
