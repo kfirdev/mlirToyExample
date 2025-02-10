@@ -4,19 +4,13 @@
 include "ArraysDialect.td"
 include "ArraysAttr.td"
 include "ArraysType.td"
-include "ArraysInterface.td"
 include "../Primitive/PrimitiveInterfaces.td"
 include "mlir/IR/OpBase.td"
 include "mlir/IR/BuiltinTypes.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 
-def TwoXReusltLength:  NativeOpTrait<"TwoXReusltLength"> {
-  let cppNamespace = "::mlir::toylang::arrays";
-}
-
-//InferTypeOpInterface
-def Arr_ConcatOp : Op<Arrays_Dialect,"concat",[Pure,TwoXReusltLength,InferTypeOpInterface,DeclareOpInterfaceMethods<ArrayInferTypeInterface>]> {
+def Arr_ConcatOp : Op<Arrays_Dialect,"concat",[Pure,DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
 	let assemblyFormat = "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)`";
 	let arguments = (ins Arr_ArrType:$lhs, Arr_ArrType:$rhs);
 	let results = (outs Arr_ArrType:$output);

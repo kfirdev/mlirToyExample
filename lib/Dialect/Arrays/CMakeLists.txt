@@ -1,9 +1,7 @@
 add_mlir_dialect_library(MLIRArr
 	ArraysDialect.cpp
 	ArraysParser.cpp
-	ArraysInterface.cpp
 
 	DEPENDS
 	MLIRArrDialectIncGen
-	MLIRArrInterfaceIncGen
     )
