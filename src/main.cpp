@@ -29,7 +29,6 @@ void arraysToLLVMPipelineBuilder(mlir::OpPassManager &manager) {
   manager.addPass(mlir::toylang::primitive::createPrimToStandard());
   manager.addPass(mlir::createCanonicalizerPass());
 
-  //manager.addPass(mlir::toylang::arrays::createConcatReplacePass());
   manager.addPass(mlir::tosa::createTosaToTensor());
   manager.addPass(mlir::affine::createSimplifyAffineStructuresPass());
   manager.addPass(mlir::createLowerAffinePass());
