@@ -4,6 +4,7 @@
 #include "include/ToyLang/Conversions/Primitive/PrimitiveToStandard.h"
 #include "include/ToyLang/Passes/Primitive/Passes.h"
 #include "include/ToyLang/Passes/Primitive/PrintPass.h"
+#include "mlir/Dialect/Bufferization/IR/BufferizableOpInterface.h"
 #include "mlir/Dialect/Bufferization/Transforms/Passes.h"
 #include "mlir/Dialect/Tensor/Transforms/Passes.h"
 #include "mlir/InitAllDialects.h"
@@ -27,10 +28,21 @@ void arraysToLLVMPipelineBuilder(mlir::OpPassManager &manager) {
   manager.addPass(mlir::toylang::primitive::createPrimToStandard());
   manager.addPass(mlir::createCanonicalizerPass());
   manager.addPass(mlir::toylang::arrays::createConcatReplacePass());
+  manager.addPass(mlir::affine::createSimplifyAffineStructuresPass());
+  manager.addPass(mlir::createLowerAffinePass());
 
   manager.addPass(mlir::bufferization::createEmptyTensorToAllocTensorPass());
   mlir::bufferization::OneShotBufferizationOptions bufferizationOptions;
   bufferizationOptions.bufferizeFunctionBoundaries = true;
+
+  bufferizationOptions.unknownTypeConverterFn = [=](
+		  mlir::Value value, mlir::Attribute memorySpace,
+		  const mlir::bufferization::BufferizationOptions &options) {
+		auto tensorType = llvm::cast<mlir::TensorType>(value.getType());
+      return mlir::bufferization::getMemRefTypeWithStaticIdentityLayout(tensorType,
+                                                                  memorySpace);
+  };
+
   // *SUPER IMPORTANT* this makes the memref not be so dynamic which then makes
   // the lowering not use the memrefCopy function this is very good
   bufferizationOptions.setFunctionBoundaryTypeConversion(mlir::bufferization::LayoutMapOption::IdentityLayoutMap);
@@ -38,12 +50,11 @@ void arraysToLLVMPipelineBuilder(mlir::OpPassManager &manager) {
   manager.addPass(mlir::bufferization::createOneShotBufferizePass(bufferizationOptions));
   mlir::bufferization::BufferDeallocationPipelineOptions deallocationOptions;
   mlir::bufferization::buildBufferDeallocationPipeline(manager, deallocationOptions);
+  manager.addPass(mlir::bufferization::createPromoteBuffersToStackPass());
 
-  manager.addPass(mlir::affine::createSimplifyAffineStructuresPass());
   manager.addPass(mlir::memref::createExpandStridedMetadataPass());
   manager.addPass(mlir::createBufferizationToMemRefPass());
 
-  manager.addPass(mlir::createLowerAffinePass());
   manager.addPass(mlir::createArithToLLVMConversionPass());
   manager.addPass(mlir::createConvertIndexToLLVMPass());
   manager.addPass(mlir::createConvertFuncToLLVMPass());

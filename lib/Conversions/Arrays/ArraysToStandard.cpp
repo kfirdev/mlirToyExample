@@ -23,7 +23,12 @@ class ArraysToStandardTypeConverter : public TypeConverter {
 			addConversion([](Type type) { return type; });
  	 	  	addConversion([ctx](ArrayType type) -> Type {
 					auto convSubType = type.getType().toStandard();
-					return mlir::RankedTensorType::get(type.getLength(),convSubType);
+					if (type.getLength() != 0){
+						return mlir::RankedTensorType::get(type.getLength(),convSubType);
+					}
+					else{
+						return mlir::RankedTensorType::get(mlir::ShapedType::kDynamic,convSubType);
+					}
  	 	  	});
 			addSourceMaterialization([](OpBuilder &builder, Type type,
     		                            ValueRange inputs, Location loc) -> Value {

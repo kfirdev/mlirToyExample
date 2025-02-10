@@ -40,6 +40,7 @@ class llvm_struct{
 			return os;
 		}
 		friend llvm_struct<int,6> test_concatOp(llvm_struct<int,3> &first,llvm_struct<int,3> &second);
+		friend llvm_struct<int,6> test_dyn_concatOp(llvm_struct<int,3> &first,llvm_struct<int,3> &second);
 		friend int test_extractOp(llvm_struct<int,3> &first);
 		friend llvm_struct<int,3> test_insertOp(llvm_struct<int,3> &first);
 
@@ -47,12 +48,18 @@ class llvm_struct{
 
 extern "C" {
 llvm_struct<int,6> test_concatOp_extern(int*,int*,int64_t,int64_t,int64_t,int*,int*,int64_t,int64_t,int64_t);
+llvm_struct<int,6> test_dyn_concatOp_extern(int*,int*,int64_t,int64_t,int64_t,int*,int*,int64_t,int64_t,int64_t);
 int test_extractOp_extern(int*,int*,int64_t,int64_t,int64_t);
 llvm_struct<int,3> test_insertOp_extern(int*,int*,int64_t,int64_t,int64_t);
 }
 
 llvm_struct<int,6> test_concatOp(llvm_struct<int,3> &first,llvm_struct<int,3> &second){
 	return test_concatOp_extern(
+			first.alloc_ptr,first.align_ptr,first.offset,first.size,first.stride,
+			second.alloc_ptr,second.align_ptr,second.offset,second.size,second.stride);
+}
+llvm_struct<int,6> test_dyn_concatOp(llvm_struct<int,3> &first,llvm_struct<int,3> &second){
+	return test_dyn_concatOp_extern(
 			first.alloc_ptr,first.align_ptr,first.offset,first.size,first.stride,
 			second.alloc_ptr,second.align_ptr,second.offset,second.size,second.stride);
 }
@@ -73,6 +80,9 @@ int main(int argc, char *argv[]){
 
 	llvm_struct<int,6> resConcat = test_concatOp(first,second);
 	std::cout << "Result: " << resConcat;
+
+	llvm_struct<int,6> resdynConcat = test_dyn_concatOp(first,second);
+	std::cout << "Result: " << resdynConcat;
 
 	int resExtract = test_extractOp(first);
 	printf("Result: %d\n",resExtract);
