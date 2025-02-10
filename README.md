@@ -12,3 +12,4 @@ The language will support if, for and functions.
 
 ## Docs
 Look at the docs folder for explanations
+For a great tutorial checkout [mlir beginners](https://github.com/j2kun/mlir-tutorial)
