@@ -1,7 +1,6 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveDialect.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveOps.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysDialect.h"
-#include "include/ToyLang/Dialect/Arrays/ArraysInterface.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysType.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysAttr.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysOps.h"
@@ -57,9 +56,6 @@ template <typename T> hash_code hash_value(SmallVector<T> S) {
 }
 
 namespace mlir::toylang::arrays{
-//#include "ToyLang/Dialect/Arrays/ArraysAttrInterfaces.cpp.inc"
-//#include "ToyLang/Dialect/Arrays/ArraysTypeInterfaces.cpp.inc"
-#include "ToyLang/Dialect/Arrays/ArraysOpInterfaces.cpp.inc"
 
 void ArraysDialect::initialize(){
 	addTypes<

@@ -2,7 +2,6 @@
 #define LIB_DIALECT_ARR_POLYTYPES_TD_
 
 include "ArraysDialect.td"
-include "ArraysInterface.td"
 include "../Primitive/PrimitiveInterfaces.td"
 include "mlir/IR/AttrTypeBase.td"
 
