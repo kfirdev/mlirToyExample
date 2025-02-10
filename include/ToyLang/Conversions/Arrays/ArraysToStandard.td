@@ -12,6 +12,7 @@ def ArrToStandard : Pass<"arrays-to-standard"> {
   let dependentDialects = [
     "mlir::arith::ArithDialect",
     "mlir::tensor::TensorDialect",
+    "mlir::tosa::TosaDialect",
     "mlir::toylang::primitive::PrimitiveDialect",
     "mlir::toylang::arrays::ArraysDialect",
   ];

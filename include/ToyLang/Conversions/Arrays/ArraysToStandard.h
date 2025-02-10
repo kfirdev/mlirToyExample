@@ -3,6 +3,7 @@
 #include "mlir/Pass/Pass.h"
 
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
+#include "mlir/Dialect/Tosa/IR/TosaOps.h"
 
 namespace mlir::toylang::arrays{
 

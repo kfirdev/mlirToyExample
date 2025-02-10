@@ -15,7 +15,7 @@ func.func @test_constOp() -> !arrays.array<3,!primitive.int<10>> {
 
 //CHECK-LABEL: test_concatOp
 func.func @test_concatOp(%arg0: !arrays.array<3,!primitive.int<32>>, %arg1: !arrays.array<3,!primitive.int<32>>) -> !arrays.array<6,!primitive.int<32>> {
-  // CHECK: tensor.concat
+  // CHECK: tosa.concat
   %0 = arrays.concat %arg0, %arg1 : (!arrays.array<3,!primitive.int<32>>, !arrays.array<3,!primitive.int<32>>)
   return %0 : !arrays.array<6,!primitive.int<32>>
 }

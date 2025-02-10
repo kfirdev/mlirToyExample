@@ -16,6 +16,7 @@
 #include "mlir/Conversion/FuncToLLVM/ConvertFuncToLLVMPass.h"
 #include "mlir/Conversion/ArithToLLVM/ArithToLLVM.h"
 #include "mlir/Conversion/MemRefToEmitC/MemRefToEmitCPass.h"
+#include "mlir/Conversion/TosaToTensor/TosaToTensor.h"
 #include "include/ToyLang/Conversions/Arrays/ArraysToStandard.h"
 
 void arraysToStandardPipelineBuilder(mlir::OpPassManager &manager) {
@@ -27,7 +28,9 @@ void arraysToLLVMPipelineBuilder(mlir::OpPassManager &manager) {
   manager.addPass(mlir::toylang::arrays::createArrToStandard());
   manager.addPass(mlir::toylang::primitive::createPrimToStandard());
   manager.addPass(mlir::createCanonicalizerPass());
-  manager.addPass(mlir::toylang::arrays::createConcatReplacePass());
+
+  //manager.addPass(mlir::toylang::arrays::createConcatReplacePass());
+  manager.addPass(mlir::tosa::createTosaToTensor());
   manager.addPass(mlir::affine::createSimplifyAffineStructuresPass());
   manager.addPass(mlir::createLowerAffinePass());
 

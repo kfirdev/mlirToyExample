@@ -10,6 +10,7 @@
 #include "include/ToyLang/Dialect/Arrays/ArraysOps.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysAttr.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
+#include "mlir/Dialect/Tosa/IR/TosaOps.h"
 #include "mlir/Dialect/Arith/IR/Arith.h"
 
 namespace mlir::toylang::arrays{
@@ -60,7 +61,7 @@ struct ConvertConcat : public mlir::OpConversionPattern<ConcatOp>{
 
 	LogicalResult matchAndRewrite(ConcatOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
 
-		tensor::ConcatOp concatOp = rewriter.create<tensor::ConcatOp>(op.getLoc(),0,adaptor.getOperands());
+		tosa::ConcatOp concatOp = rewriter.create<tosa::ConcatOp>(op.getLoc(),adaptor.getOperands(),0);
 
 		rewriter.replaceOp(op.getOperation(), concatOp.getOperation());
 		return llvm::success();
