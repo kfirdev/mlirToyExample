@@ -34,27 +34,18 @@ TypesMatchWith<"scalar type matches type of an element in dest",
 SameTypeOperands - The operands have the same type.
 SameOperandsAndResultType - the operands and result of the same type.
 
-Another trait that help infer only the result type is InferTypeOpInterface
-this trait added to an op that has interReturnType function uses that function
-to infer the return type by that letting omit the return type from the assembly,
-if the op doesn't implement interReturnType you can use DeclareOpInterfaceMethods<InferTypeOpInterface>
-which will add this function to the op which you will have to implement yourself.
-Here is an example implementation:
 
-In this example the operands are arrays, the type of the output is the same as the input but
-with a length that is equal to both them combined because this operation is a concat.
-```cpp
-::llvm::LogicalResult ConcatOp::inferReturnTypes(::mlir::MLIRContext *context, ::std::optional<::mlir::Location> location, ::mlir::ValueRange operands, ::mlir::DictionaryAttr attributes, ::mlir::OpaqueProperties properties, ::mlir::RegionRange regions, ::llvm::SmallVectorImpl<::mlir::Type>&inferredReturnTypes) {
-  inferredReturnTypes.resize(1);
-  ::mlir::Builder odsBuilder(context);
-  if (operands.size() <= 1)
-    return ::mlir::failure();
+## Other traits
+Here are some traits which don't have an explanation on the site and their explanation:
 
-  auto Lhs = mlir::dyn_cast<ArrayType>(operands[0].getType());
-  auto Rhs = mlir::dyn_cast<ArrayType>(operands[1].getType());
-  ::mlir::Type odsInferredType0 = ArrayType::get(operands[0].getType().getContext(),Lhs.getLength()+Rhs.getLength(),Lhs.getType());
+RecursiveMemoryEffects - This trait indicates that the memory effects of an operation includes the
+effects of operations nested within its regions. If the operation has no derived effects interfaces, 
+the operation itself can be assumed to have no memory effects.
 
-  inferredReturnTypes[0] = odsInferredType0;
-  return ::mlir::success();
-}
-```
+RecursivelySpeculatable - This trait marks an op (which must be tagged as implementing the 
+ConditionallySpeculatable interface) as being recursively speculatable.
+This means that said op can be speculated only if all the instructions in all the 
+regions attached to the op can be speculated. 
+
+NoRegionArguments - This trait provides a verifier for ops that are expecting their regions to
+not have any arguments 

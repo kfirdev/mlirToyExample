@@ -25,3 +25,14 @@ func.func @test_bool(%arg0: !primitive.bool, %arg1: !primitive.bool) -> !primiti
   %1 = primitive.div %0, %arg1 : !primitive.bool // true
   return %1 : !primitive.bool
 }
+
+// CHECK: 10
+func.func @test_if(%cond: !primitive.bool, %res: !primitive.int<32>) -> !primitive.int<32>{ //cond = true, res = 10
+  %2 = primitive.if %cond -> !primitive.int<32>{
+	primitive.yield %res : !primitive.int<32>
+  } else {
+	%3 = primitive.constant 2 : 32 
+	primitive.yield %3 : !primitive.int<32>
+  }
+  return %2 : !primitive.int<32>
+}
