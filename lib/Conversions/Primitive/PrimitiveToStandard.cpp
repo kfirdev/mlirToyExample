@@ -1,6 +1,7 @@
 #include "include/ToyLang/Conversions/Primitive/PrimitiveToStandard.h"
 #include "mlir/Dialect/Func/Transforms/FuncConversions.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Transforms/DialectConversion.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveDialect.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveTypes.h"
@@ -53,6 +54,7 @@ struct ConvertMult : public mlir::OpConversionPattern<MultOp>{
 		return llvm::success();
 	}
 };
+
 struct ConvertDiv : public mlir::OpConversionPattern<DivOp>{
 	ConvertDiv(mlir::TypeConverter& type_convertor, MLIRContext* context) 
 		: mlir::OpConversionPattern<DivOp>(type_convertor,context){}
@@ -60,6 +62,47 @@ struct ConvertDiv : public mlir::OpConversionPattern<DivOp>{
 	LogicalResult matchAndRewrite(DivOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
 		mlir::Operation* divOp = op.getType().divToStandard(rewriter,op.getLoc(),adaptor.getLhs(),adaptor.getRhs());
 		rewriter.replaceOp(op.getOperation(), divOp);
+		return llvm::success();
+	}
+};
+
+struct ConvertIf : public mlir::OpConversionPattern<IfOp>{
+	ConvertIf(mlir::TypeConverter& type_convertor, MLIRContext* context) 
+		: mlir::OpConversionPattern<IfOp>(type_convertor,context){}
+
+	LogicalResult matchAndRewrite(IfOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+
+		mlir::Type resType = mlir::cast<PrimitiveTypeInterface>(op.getResult().getType().front()).toStandard();
+		scf::IfOp ifOp = rewriter.create<scf::IfOp>(
+				op.getLoc(),resType,adaptor.getCondition(),
+				!adaptor.getThenRegion().empty(),!adaptor.getElseRegion().empty());
+
+
+		rewriter.eraseBlock(&ifOp.getThenRegion().front());
+		// Inline the 'then' region from the original op into the new scf.if.
+    	// This moves the single block from op.getThenRegion() into newIf.thenRegion().
+    	rewriter.inlineRegionBefore(op.getThenRegion(), ifOp.getThenRegion(),
+    	                            ifOp.getThenRegion().begin());
+
+    	// If there is an else region, inline it similarly.
+    	if (!adaptor.getElseRegion().empty()) {
+		  rewriter.eraseBlock(&ifOp.getElseRegion().front());
+    	  rewriter.inlineRegionBefore(op.getElseRegion(), ifOp.getElseRegion(),
+    	                              ifOp.getElseRegion().begin());
+    	}
+    	
+    	// Replace the original op with the results of the new scf.if.
+    	rewriter.replaceOp(op.getOperation(), ifOp.getOperation());
+    	return success();
+	}
+};
+struct ConvertYield : public mlir::OpConversionPattern<YieldOp>{
+	ConvertYield(mlir::TypeConverter& type_convertor, MLIRContext* context) 
+		: mlir::OpConversionPattern<YieldOp>(type_convertor,context){}
+
+	LogicalResult matchAndRewrite(YieldOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		mlir::scf::YieldOp yieldOp = rewriter.create<scf::YieldOp>(op.getLoc(),adaptor.getResults());
+		rewriter.replaceOp(op.getOperation(), yieldOp.getOperation());
 		return llvm::success();
 	}
 };
@@ -85,6 +128,7 @@ struct ConvertToStandard : public mlir::OpConversionPattern<ToStandardOp>{
 		return llvm::success();
 	}
 };
+
 struct ConvertFromStandard : public mlir::OpConversionPattern<FromStandardOp>{
 	ConvertFromStandard(mlir::TypeConverter& type_convertor, MLIRContext* context) 
 		: mlir::OpConversionPattern<FromStandardOp>(type_convertor,context){}
@@ -104,16 +148,21 @@ struct PrimToStandard : impl::PrimToStandardBase<PrimToStandard> {
 	ConversionTarget target(*context);
 	target.addIllegalDialect<PrimitiveDialect>();
 	target.addLegalDialect<arith::ArithDialect>();
+	target.addLegalDialect<scf::SCFDialect>();
 
 	mlir::RewritePatternSet patterns(context);
 	PrimitiveToStandardTypeConverter type_convertor(context);
-	patterns.add<ConvertAdd>(type_convertor,context);
-	patterns.add<ConvertSub>(type_convertor,context);
-	patterns.add<ConvertMult>(type_convertor,context);
-	patterns.add<ConvertDiv>(type_convertor,context);
-	patterns.add<ConvertToStandard>(type_convertor,context);
-	patterns.add<ConvertFromStandard>(type_convertor,context);
-	patterns.add<ConvertConstant>(type_convertor,context);
+	patterns.add<
+	ConvertAdd,
+	ConvertSub,
+	ConvertMult,
+	ConvertDiv,
+	ConvertIf,
+    ConvertYield,
+	ConvertToStandard,
+	ConvertFromStandard,
+	ConvertConstant
+	>(type_convertor,context);
 
 	populateFunctionOpInterfaceTypeConversionPattern<mlir::func::FuncOp>(
         patterns, type_convertor);

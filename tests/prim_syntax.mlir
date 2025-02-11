@@ -38,15 +38,8 @@ func.func @test_bool(%arg0: !primitive.bool,%arg1: !primitive.bool) -> !primitiv
 //CHECK-LABEL: test_if
 func.func @test_if(%cond: !primitive.bool, %res: !primitive.int<10>) -> !primitive.int<10>{
 
-  %0 = primitive.constant true
   // CHECK: primitive.if
-  %1 = primitive.if %cond -> !primitive.bool{
-	%1 = primitive.constant true
-	primitive.yield %1 : !primitive.bool
-  }
-
-  // CHECK: primitive.if
-  %2 = primitive.if %0 -> !primitive.int<10>{
+  %2 = primitive.if %cond -> !primitive.int<10>{
 	// CHECK: primitive.yield
 	primitive.yield %res : !primitive.int<10>
   } else {

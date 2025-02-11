@@ -35,3 +35,19 @@ func.func @test_bool(%arg0: !primitive.bool) -> !primitive.bool {
   %1 = primitive.div %0, %arg0 : !primitive.bool
   return %1 : !primitive.bool
 }
+
+//CHECK-LABEL: test_if
+func.func @test_if(%cond: !primitive.bool, %res: !primitive.int<10>) -> !primitive.int<10>{
+
+  // CHECK: scf.if
+  %2 = primitive.if %cond -> !primitive.int<10>{
+	// CHECK: scf.yield
+	primitive.yield %res : !primitive.int<10>
+  } else {
+	%3 = primitive.constant 2 : 10 
+	// CHECK: scf.yield
+	primitive.yield %3 : !primitive.int<10>
+  }
+
+  return %2 : !primitive.int<10>
+}
