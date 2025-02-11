@@ -165,10 +165,65 @@ _odsPrinter.printStrippedAttrOrType(getValueAttr());
     auto type = getOutput().getType();
 	// convert to the interface for the type instead
     if (auto validType = ::llvm::dyn_cast<PrimitiveTypeInterface>(type))
-      _odsPrinter.printStrippedAttrOrType(validType);
+		_odsPrinter.printStrippedAttrOrType(validType);
    else
-     _odsPrinter << type;
+		_odsPrinter << type;
   }
 }
+
+//===----------------------------------------------------------------------===//
+// Parse IfOp
+//===----------------------------------------------------------------------===//
+ParseResult IfOp::parse(OpAsmParser &parser, OperationState &result) {
+	result.regions.reserve(2);
+	Region *thenRegion = result.addRegion();
+    Region *elseRegion = result.addRegion();
+
+  	OpAsmParser::UnresolvedOperand cond;
+	auto boolType = mlir::toylang::primitive::BoolType::get(parser.getContext());
+  	if (parser.parseOperand(cond) ||
+  	    parser.resolveOperand(cond, boolType, result.operands))
+  	  return failure();
+
+	if (parser.parseOptionalArrowTypeList(result.types))
+		return failure();
+
+	if (parser.parseRegion(*thenRegion, /*arguments=*/{}, /*argTypes=*/{}))
+		return failure();
+
+	if (!parser.parseOptionalKeyword("else"))
+		if (parser.parseRegion(*elseRegion, /*arguments=*/{}, /*argTypes=*/{}))
+			return failure();
+
+	if (parser.parseOptionalAttrDict(result.attributes))
+		return failure();
+
+	return mlir::success();
+}
+
+void IfOp::print(OpAsmPrinter &p) {
+  bool printBlockTerminators = false;
+
+  p << " " << getCondition();
+  if (!getResults().empty()) {
+    p << " -> (" << getResultTypes() << ")";
+    // Print yield explicitly if the op defines values.
+    printBlockTerminators = true;
+  }
+  p << ' ';
+  p.printRegion(getThenRegion(),
+                /*printEntryBlockArgs=*/false,
+                /*printBlockTerminators=*/printBlockTerminators);
+  if (auto &elseRegion = getElseRegion(); !elseRegion.empty()){
+  p << " else ";
+  p.printRegion(elseRegion,
+                /*printEntryBlockArgs=*/false,
+                /*printBlockTerminators=*/printBlockTerminators);
+  }
+
+
+  p.printOptionalAttrDict((*this)->getAttrs());
+}
+
 
 } // namespace mlir::toylang::primitive

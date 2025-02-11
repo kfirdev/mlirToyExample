@@ -7,6 +7,7 @@ include "PrimitiveAttr.td"
 include "mlir/IR/OpBase.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
+include "mlir/Interfaces/ControlFlowInterfaces.td"
 
 class Primitive_BinOpBase<string name> : Op<Primitive_Dialect, name, [Pure,SameOperandsAndResultType]>{
 	let assemblyFormat =  "$lhs `,` $rhs attr-dict `:` qualified(type($output))";
@@ -46,6 +47,25 @@ def Prim_ToStandardOp : Op<Primitive_Dialect, "to_standard", [Pure]> {
   let arguments = (ins PrimitiveTypeInterface:$input);
   let results = (outs AnyTypeOf<[AnyInteger,AnyFloat]>:$output);
   let assemblyFormat = "$input attr-dict `:` qualified(type($input)) `->` type($output)";
+}
+// DeclareOpInterfaceMethods<RegionBranchOpInterface>
+def Prim_IfOp : Op<Primitive_Dialect, "if", [RecursiveMemoryEffects, RecursivelySpeculatable, NoRegionArguments]> {
+  let summary = "if statement";
+  let arguments = (ins Prim_BoolType:$condition);
+  let results = (outs Variadic<PrimitiveTypeInterface>:$result);
+  let regions = (region SizedRegion<1>:$thenRegion,
+                         MaxSizedRegion<1>:$elseRegion);
+  let hasCustomAssemblyFormat = 1;
+  let hasFolder = 1;
+}
+//ParentOneOf<["IfOp"]>
+def Prim_YieldOp : Op<Primitive_Dialect, "yield", [Pure, ReturnLike, Terminator]> {
+  let summary = "yield statement";
+  let arguments = (ins Variadic<PrimitiveTypeInterface>:$results);
+  let builders = [OpBuilder<(ins), [{ /* nothing to do */ }]>];
+
+  let assemblyFormat =
+      [{  attr-dict ($results^ `:` type($results))? }];
 }
 
 def PrimInt_ConstantOp : Op<Primitive_Dialect, "constant", [Pure, ConstantLike]> {

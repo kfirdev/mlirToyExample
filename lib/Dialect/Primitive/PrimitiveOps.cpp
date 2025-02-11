@@ -99,9 +99,31 @@ mlir::OpFoldResult DivOp::fold(DivOp::FoldAdaptor adaptor){
 	auto rhs = mlir::cast<PrimitiveAttrInterface>(adaptor.getOperands()[1]);
 	return lhs.div(rhs);
 }
-//mlir::OpFoldResult FromStandardOp::fold(FromStandardOp::FoldAdaptor adaptor) {
-//  // Returns null if the cast failed, which corresponds to a failed fold.
-//  return dyn_cast_or_null<DenseIntElementsAttr>(adaptor.getInput());
-//}
+
+llvm::LogicalResult IfOp::fold(FoldAdaptor adaptor, ::llvm::SmallVectorImpl<::mlir::OpFoldResult> &results){
+
+  if (adaptor.getCondition() == NULL){
+	  return failure();
+  }
+
+  auto condAttr = mlir::dyn_cast<BoolAttr>(adaptor.getCondition());
+  if (!condAttr){
+	  return failure();
+  }
+
+  bool cond = condAttr.getValue();
+
+  auto& region = cond ? adaptor.getThenRegion() : adaptor.getElseRegion();
+
+  if (region.empty()){
+	  return failure();
+  }
+  if (auto yieldOperands = region.front().getTerminator();yieldOperands){
+	  results.push_back(yieldOperands->getOperand(0));
+	  return success();
+  }
+
+  return failure();
+}
 
 }// namespace mlir::toylang::primitive
