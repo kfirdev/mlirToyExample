@@ -125,5 +125,23 @@ llvm::LogicalResult IfOp::fold(FoldAdaptor adaptor, ::llvm::SmallVectorImpl<::ml
 
   return failure();
 }
+Block::BlockArgListType ForOp::getRegionIterArgs() {
+  return getRegion().front().getArguments().drop_front(1);
+}
+SmallVector<Region *> ForOp::getLoopRegions() { return {&getRegion()}; }
+
+LogicalResult ForOp::verify() {
+  // Check that the number of init args and op results is the same.
+  if (getInitArgs().size() != getNumResults())
+    return emitOpError(
+        "mismatch in number of loop-carried values and defined values");
+
+  return success();
+}
+
+MutableArrayRef<OpOperand> ForOp::getInitsMutable() {
+  return getInitArgsMutable();
+}
+
 
 }// namespace mlir::toylang::primitive

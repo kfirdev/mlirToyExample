@@ -14,7 +14,11 @@ for example you can check out the IsABool and such traits here that are slapped 
 based on if it has the trait or not.
 
 Moreover there are traits that can help you infer types:
-AllTypesMatch - meaning you only need to specify one type.
+AllTypesMatch - meaning all the variables you mentioned have the same type.
+```tablegen
+AllTypesMatch<["lowerBound", "upperBound", "step"]>,
+```
+
 TypesMatchWith - using one type to infer another, example:
 
 Here I specify that the dest and result have the same type.
