@@ -60,10 +60,10 @@ func.func @test_for() -> !primitive.int<32>{
   %0 = primitive.for %1 = %start to %end step %step 
 		iter_args(%sum_iter = %sum_0) -> (!primitive.int<32>){
 
-	  %val = primitive.add %sum_iter, %step : !primitive.int<32>
+	  %val = primitive.add %start, %step : !primitive.int<32>
 
 	  primitive.yield %val: !primitive.int<32>
   }
 
-  return %step : !primitive.int<32>
+  return %0 : !primitive.int<32>
 }

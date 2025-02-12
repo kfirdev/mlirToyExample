@@ -84,6 +84,7 @@ int main(int argc, char **argv) {
 	registry.insert<mlir::toylang::arrays::ArraysDialect>();
 	mlir::registerAllDialects(registry);
 	mlir::registerAllPasses();
+	mlir::PassRegistration<mlir::toylang::primitive::FullUnrollPass>();
 	mlir::toylang::primitive::passes::registerPrintPass();
 	mlir::toylang::primitive::registerPrimToStandardPass();
 	//mlir::toylang::arrays::registerArrToStandardPass();

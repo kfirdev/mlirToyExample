@@ -88,16 +88,12 @@ def Prim_ForOp : Op<Primitive_Dialect, "for", [AutomaticAllocationScope,
 
   let extraClassDeclaration = [{
 	  Value getInductionVar() { return getRegion().front().getArguments()[0]; }
-
-	  /// Return the `index`-th region iteration argument.
-	  //BlockArgument getRegionIterArgs() {
-	  //    return getRegion().front().getArguments().drop_front(1);
-	  //}
   }];
 
   let hasCustomAssemblyFormat = 1;
   //let hasFolder = 1;
   let hasVerifier = 1;
+  let hasCanonicalizer = 1;
 }
 
 def PrimInt_ConstantOp : Op<Primitive_Dialect, "constant", [Pure, ConstantLike]> {
