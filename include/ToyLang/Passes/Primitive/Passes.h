@@ -11,19 +11,21 @@
 
 namespace mlir::toylang::primitive{
 
-struct ForLoopUnroll : public OpRewritePattern<ForOp> {
-  using OpRewritePattern<ForOp>::OpRewritePattern;
-
-  LogicalResult matchAndRewrite(ForOp forOp,PatternRewriter &rewriter) const final;
-
-
-};
 struct FullUnrollPass : PassWrapper<FullUnrollPass,OperationPass<>>{
 	void runOnOperation() override;
 	StringRef getArgument() const final { return "full-unroll"; }
 
   	StringRef getDescription() const final {
   	  return "Fully unroll all loops";
+  	}
+};
+
+struct HoistConstPass : PassWrapper<HoistConstPass,OperationPass<>>{
+	void runOnOperation() override;
+	StringRef getArgument() const final { return "hoist-const"; }
+
+  	StringRef getDescription() const final {
+  	  return "Hoist constants out of the loop";
   	}
 };
 

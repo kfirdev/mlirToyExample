@@ -136,9 +136,9 @@ struct ForLoopUnroll : public OpRewritePattern<ForOp> {
     auto lowerConst = forOp.getLowerBound().getDefiningOp<ConstantOp>();
     auto upperConst = forOp.getHigherBound().getDefiningOp<ConstantOp>();
     auto stepConst = forOp.getStep().getDefiningOp<ConstantOp>();
-    if (forOp.getLowerBound() == NULL || forOp.getHigherBound() == NULL || forOp.getStep() == NULL){
-        return failure();
-    }
+  	if (!lowerConst || !upperConst || !stepConst){
+  	    return failure();
+  	}
     
     int lower = mlir::cast<IntegerAttr>(lowerConst.getValue()).getValue().getZExtValue();
     int upper = mlir::cast<IntegerAttr>(upperConst.getValue()).getValue().getZExtValue();
@@ -164,7 +164,7 @@ struct ForLoopUnroll : public OpRewritePattern<ForOp> {
 
     	mlir::Operation* terminatorOp;
     	for (auto& op: forOp.getRegion().front()){
-    		if (auto _ = mlir::dyn_cast<YieldOp>(op)){
+    		if (mlir::dyn_cast<YieldOp>(op)){
     			terminatorOp = rewriter.clone(op,mapping);
     		}
     		else{
@@ -188,9 +188,25 @@ struct ForLoopUnroll : public OpRewritePattern<ForOp> {
   }
 };
 
+struct ForHoistConst : public OpRewritePattern<ForOp> {
+  using OpRewritePattern<ForOp>::OpRewritePattern;
+
+  LogicalResult matchAndRewrite(ForOp forOp,PatternRewriter &rewriter) const final{
+
+  	IRMapping mapping;
+	  for (auto& op: forOp.getRegion().front().without_terminator()){
+		  if (mlir::dyn_cast<ConstantOp>(op)){
+			  auto new_op = rewriter.clone(op,mapping);
+			  rewriter.replaceOp(&op,new_op->getResults());
+		  }
+	  }
+
+	  return success();
+  }
+};
 void ForOp::getCanonicalizationPatterns(RewritePatternSet &results,
                                         MLIRContext *context) {
-  results.add<ForLoopUnroll>(
+  results.add<ForLoopUnroll,ForHoistConst>(
       context);
 }
 

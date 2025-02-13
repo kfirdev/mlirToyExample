@@ -85,6 +85,7 @@ int main(int argc, char **argv) {
 	mlir::registerAllDialects(registry);
 	mlir::registerAllPasses();
 	mlir::PassRegistration<mlir::toylang::primitive::FullUnrollPass>();
+	mlir::PassRegistration<mlir::toylang::primitive::HoistConstPass>();
 	mlir::toylang::primitive::passes::registerPrintPass();
 	mlir::toylang::primitive::registerPrimToStandardPass();
 	//mlir::toylang::arrays::registerArrToStandardPass();

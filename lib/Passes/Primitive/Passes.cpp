@@ -28,61 +28,68 @@ struct PrintPass : impl::PrintPassBase<PrintPass>{
 //===----------------------------------------------------------------------===//
 // For loop unroll 
 //===----------------------------------------------------------------------===//
-LogicalResult ForLoopUnroll::matchAndRewrite(ForOp forOp,PatternRewriter &rewriter) const {
 
-  auto lowerConst = forOp.getLowerBound().getDefiningOp<ConstantOp>();
-  auto upperConst = forOp.getHigherBound().getDefiningOp<ConstantOp>();
-  auto stepConst = forOp.getStep().getDefiningOp<ConstantOp>();
-  if (forOp.getLowerBound() == NULL || forOp.getHigherBound() == NULL || forOp.getStep() == NULL){
-      return failure();
-  }
-  
-  int lower = mlir::cast<IntegerAttr>(lowerConst.getValue()).getValue().getZExtValue();
-  int upper = mlir::cast<IntegerAttr>(upperConst.getValue()).getValue().getZExtValue();
-  int step = mlir::cast<IntegerAttr>(stepConst.getValue()).getValue().getZExtValue();
+struct ForLoopUnroll : public OpRewritePattern<ForOp> {
+  using OpRewritePattern<ForOp>::OpRewritePattern;
 
+  LogicalResult matchAndRewrite(ForOp forOp,PatternRewriter &rewriter) const final{
 
-  rewriter.setInsertionPointAfter(forOp.getOperation());
-  IRMapping mapping;
+	auto lowerConst = forOp.getLowerBound().getDefiningOp<ConstantOp>();
+  	auto upperConst = forOp.getHigherBound().getDefiningOp<ConstantOp>();
+  	auto stepConst = forOp.getStep().getDefiningOp<ConstantOp>();
+  	if (!lowerConst || !upperConst || !stepConst){
+  	    return failure();
+  	}
+  	
+  	int lower = mlir::cast<IntegerAttr>(lowerConst.getValue()).getValue().getZExtValue();
+  	int upper = mlir::cast<IntegerAttr>(upperConst.getValue()).getValue().getZExtValue();
+  	int step = mlir::cast<IntegerAttr>(stepConst.getValue()).getValue().getZExtValue();
 
-  int i = 0;
-  for (mlir::Value val: forOp.getInitArgs()){
-  	mapping.map(forOp.getRegionIterArgs()[i],val);
-  	i++;
-  }
+  	rewriter.setInsertionPointAfter(forOp.getOperation());
+  	IRMapping mapping;
 
-  mlir::Operation* lastCopiedOp;
-  for (int i= lower;i<upper;i+=step){
-  	auto constOp = rewriter.create<ConstantOp>(
-        forOp.getLoc(),forOp.getInductionVar().getType(),
-  	  IntegerAttr::get(IntegerType::get(getContext(),32),llvm::APInt{32,(uint64_t)i}));
+  	int i = 0;
+  	for (mlir::Value val: forOp.getInitArgs()){
+  		mapping.map(forOp.getRegionIterArgs()[i],val);
+  		i++;
+  	}
 
-  	mapping.map(forOp.getInductionVar(),constOp);
+  	mlir::Operation* lastCopiedOp;
+  	for (int i= lower;i<upper;i+=step){
+  		auto constOp = rewriter.create<ConstantOp>(
+  	      forOp.getLoc(),forOp.getInductionVar().getType(),
+  		  IntegerAttr::get(IntegerType::get(getContext(),32),llvm::APInt{32,(uint64_t)i}));
 
-  	mlir::Operation* terminatorOp;
-  	for (auto& op: forOp.getRegion().front()){
-  		if (auto _ = mlir::dyn_cast<YieldOp>(op)){
-  			terminatorOp = rewriter.clone(op,mapping);
+  		mapping.map(forOp.getInductionVar(),constOp);
+
+  		mlir::Operation* terminatorOp;
+  		for (auto& op: forOp.getRegion().front()){
+  			if (mlir::dyn_cast<YieldOp>(op)){
+  				terminatorOp = rewriter.clone(op,mapping);
+  			}
+  			else{
+  				lastCopiedOp = rewriter.clone(op,mapping);
+  			}
   		}
-  		else{
-  			lastCopiedOp = rewriter.clone(op,mapping);
+
+  		int k = 0;
+  		if (terminatorOp->getNumOperands() > forOp.getRegionIterArgs().size()){
+  			return emitError(terminatorOp->getLoc()) << "more values yielded than there are iter args";
   		}
+  		for (auto vals: terminatorOp->getOperands()){
+  			mapping.map(forOp.getRegionIterArgs()[k],vals);
+  			k++;
+  		}
+  		rewriter.eraseOp(terminatorOp);
   	}
+  	rewriter.replaceOp(forOp.getOperation(),lastCopiedOp);
 
-  	int k = 0;
-  	if (terminatorOp->getNumOperands() > forOp.getRegionIterArgs().size()){
-  		return emitError(terminatorOp->getLoc()) << "more values yielded than there are iter args";
-  	}
-  	for (auto vals: terminatorOp->getOperands()){
-  		mapping.map(forOp.getRegionIterArgs()[k],vals);
-  		k++;
-  	}
-  	rewriter.eraseOp(terminatorOp);
+  	return success();
+
   }
-  rewriter.replaceOp(forOp.getOperation(),lastCopiedOp);
-  return success();
 
-}
+
+};
 
 void FullUnrollPass::runOnOperation() {
 	mlir::RewritePatternSet patterns(&getContext());
@@ -93,6 +100,39 @@ void FullUnrollPass::runOnOperation() {
 	config.maxIterations = 1;
 	config.enableRegionSimplification = GreedySimplifyRegionLevel::Disabled;
 	config.strictMode = GreedyRewriteStrictness::ExistingOps;
+	(void)applyPatternsGreedily(getOperation(), std::move(patterns), config);
+}
+
+//===----------------------------------------------------------------------===//
+// Hoist constants
+//===----------------------------------------------------------------------===//
+
+struct ForHoistConst : public OpRewritePattern<ForOp> {
+  using OpRewritePattern<ForOp>::OpRewritePattern;
+
+  LogicalResult matchAndRewrite(ForOp forOp,PatternRewriter &rewriter) const final{
+
+  	IRMapping mapping;
+	  for (auto& op: forOp.getRegion().front().without_terminator()){
+		  if (mlir::dyn_cast<ConstantOp>(op)){
+			  auto new_op = rewriter.clone(op,mapping);
+			  rewriter.replaceOp(&op,new_op->getResults());
+		  }
+	  }
+
+	  return success();
+  }
+};
+
+void HoistConstPass::runOnOperation() {
+	mlir::RewritePatternSet patterns(&getContext());
+	patterns.add<ForHoistConst>(patterns.getContext());
+	mlir::GreedyRewriteConfig config;
+	//config.cseConstants = false;
+	//config.fold = false;
+	//config.maxIterations = 1;
+	//config.enableRegionSimplification = GreedySimplifyRegionLevel::Disabled;
+	//config.strictMode = GreedyRewriteStrictness::ExistingOps;
 	(void)applyPatternsGreedily(getOperation(), std::move(patterns), config);
 }
 
