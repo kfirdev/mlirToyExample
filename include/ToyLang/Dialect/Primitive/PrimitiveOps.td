@@ -5,6 +5,7 @@ include "PrimitiveDialect.td"
 include "PrimitiveTypes.td"
 include "PrimitiveAttr.td"
 include "mlir/IR/OpBase.td"
+include "mlir/Interfaces/LoopLikeInterface.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
@@ -66,6 +67,33 @@ def Prim_YieldOp : Op<Primitive_Dialect, "yield", [Pure, ReturnLike, Terminator]
 
   let assemblyFormat =
       [{  attr-dict ($results^ `:` type($results))? }];
+}
+
+def Prim_ForOp : Op<Primitive_Dialect, "for", [AutomaticAllocationScope,
+  AllTypesMatch<["lowerBound", "higherBound", "step"]>,
+  DeclareOpInterfaceMethods<LoopLikeOpInterface,["getRegionIterArgs","getInitsMutable"]>,
+  RecursiveMemoryEffects, RecursivelySpeculatable]> {
+
+  let summary = "for loop";
+  let arguments = (ins 
+  Prim_IntegerType:$lowerBound, 
+  Prim_IntegerType:$higherBound,
+  Prim_IntegerType:$step,
+  Variadic<PrimitiveTypeInterface>:$initArgs
+  );
+
+
+  let results = (outs Variadic<PrimitiveTypeInterface>:$result);
+  let regions = (region SizedRegion<1>:$region);
+
+  let extraClassDeclaration = [{
+	  Value getInductionVar() { return getRegion().front().getArguments()[0]; }
+  }];
+
+  let hasCustomAssemblyFormat = 1;
+  //let hasFolder = 1;
+  let hasVerifier = 1;
+  let hasCanonicalizer = 1;
 }
 
 def PrimInt_ConstantOp : Op<Primitive_Dialect, "constant", [Pure, ConstantLike]> {

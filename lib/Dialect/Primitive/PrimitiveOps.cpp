@@ -2,6 +2,7 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveInterfaces.h"
 #include "mlir/AsmParser/AsmParserState.h"
 #include "mlir/IR/OpImplementation.h"
+#include "mlir/IR/IRMapping.h"
 #include <string>
 
 namespace mlir::toylang::primitive{
@@ -125,5 +126,129 @@ llvm::LogicalResult IfOp::fold(FoldAdaptor adaptor, ::llvm::SmallVectorImpl<::ml
 
   return failure();
 }
+
+struct ForLoopUnroll : public OpRewritePattern<ForOp> {
+  using OpRewritePattern<ForOp>::OpRewritePattern;
+
+  LogicalResult matchAndRewrite(ForOp forOp,
+                                PatternRewriter &rewriter) const final {
+
+    auto lowerConst = forOp.getLowerBound().getDefiningOp<ConstantOp>();
+    auto upperConst = forOp.getHigherBound().getDefiningOp<ConstantOp>();
+    auto stepConst = forOp.getStep().getDefiningOp<ConstantOp>();
+  	if (!lowerConst || !upperConst || !stepConst){
+  	    return failure();
+  	}
+    
+    int lower = mlir::cast<IntegerAttr>(lowerConst.getValue()).getValue().getZExtValue();
+    int upper = mlir::cast<IntegerAttr>(upperConst.getValue()).getValue().getZExtValue();
+    int step = mlir::cast<IntegerAttr>(stepConst.getValue()).getValue().getZExtValue();
+
+
+    rewriter.setInsertionPointAfter(forOp.getOperation());
+    IRMapping mapping;
+
+    int i = 0;
+    for (mlir::Value val: forOp.getInitArgs()){
+    	mapping.map(forOp.getRegionIterArgs()[i],val);
+    	i++;
+    }
+
+    mlir::Operation* lastCopiedOp;
+    for (int i= lower;i<upper;i+=step){
+    	auto constOp = rewriter.create<ConstantOp>(
+          forOp.getLoc(),forOp.getInductionVar().getType(),
+    	  IntegerAttr::get(IntegerType::get(getContext(),32),llvm::APInt{32,(uint64_t)i}));
+
+    	mapping.map(forOp.getInductionVar(),constOp);
+
+    	mlir::Operation* terminatorOp;
+    	for (auto& op: forOp.getRegion().front()){
+    		if (mlir::dyn_cast<YieldOp>(op)){
+    			terminatorOp = rewriter.clone(op,mapping);
+    		}
+    		else{
+    			lastCopiedOp = rewriter.clone(op,mapping);
+    		}
+    	}
+
+    	int k = 0;
+    	if (terminatorOp->getNumOperands() > forOp.getRegionIterArgs().size()){
+    		return emitError(terminatorOp->getLoc()) << "more values yielded than there are iter args";
+    	}
+    	for (auto vals: terminatorOp->getOperands()){
+    		mapping.map(forOp.getRegionIterArgs()[k],vals);
+    		k++;
+    	}
+    	rewriter.eraseOp(terminatorOp);
+    }
+    rewriter.replaceOp(forOp.getOperation(),lastCopiedOp);
+    return success();
+
+  }
+};
+
+struct ForHoistConst : public OpRewritePattern<ForOp> {
+  using OpRewritePattern<ForOp>::OpRewritePattern;
+
+  LogicalResult matchAndRewrite(ForOp forOp,PatternRewriter &rewriter) const final{
+
+	SmallVector<Operation*, 4> constOps;
+	
+	//The crash is happening because you are modifying (replacing) operations 
+	//while iterating over the block’s op list directly. When you call rewriter.replaceOp()
+	//inside the range-based for loop, you invalidate the iterator for that block
+	bool all_const;
+    for (Operation &op : forOp.getRegion().front().without_terminator()) {
+	  all_const = true;
+	  for (auto operand: op.getOperands()){
+		  if (operand.getParentRegion() == &forOp.getRegion()){
+			  all_const = false; 
+		  }
+	  }
+      if (dyn_cast<ConstantOp>(op) || all_const)
+        constOps.push_back(&op);
+    }
+    // If no constants, nothing to do.
+    if (constOps.empty())
+      return failure();
+
+    // Hoist each constant out of the loop.
+    for (Operation *op : constOps) {
+      // Clone the op.
+      Operation *cloned = rewriter.clone(*op);
+      // Insert the clone before the loop op.
+      cloned->moveBefore(forOp);
+      // Replace uses of the op inside the loop with the cloned op's results.
+      rewriter.replaceOp(op, cloned->getResults());
+    }
+    return success();
+  }
+};
+
+void ForOp::getCanonicalizationPatterns(RewritePatternSet &results,
+                                        MLIRContext *context) {
+  results.add<ForLoopUnroll,ForHoistConst>(
+      context);
+}
+
+Block::BlockArgListType ForOp::getRegionIterArgs() {
+  return getRegion().front().getArguments().drop_front(1);
+}
+SmallVector<Region *> ForOp::getLoopRegions() { return {&getRegion()}; }
+
+LogicalResult ForOp::verify() {
+  // Check that the number of init args and op results is the same.
+  if (getInitArgs().size() != getNumResults())
+    return emitOpError(
+        "mismatch in number of loop-carried values and defined values");
+
+  return success();
+}
+
+MutableArrayRef<OpOperand> ForOp::getInitsMutable() {
+  return getInitArgsMutable();
+}
+
 
 }// namespace mlir::toylang::primitive

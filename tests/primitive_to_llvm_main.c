@@ -5,6 +5,7 @@ int test_primitive_fn(int x);
 float test_primitive_fn_double(float x);
 bool test_bool(bool x,bool y);
 int test_if(bool cond,int res);
+int test_for(int start, int end);
 
 int main(int argc, char *argv[]){
 	int i = 1;
@@ -24,5 +25,10 @@ int main(int argc, char *argv[]){
 	int res = 10;
 	int resultIf = test_if(cond,res);
 	printf("Result: %d\n", resultIf);
+
+	int start = 1;
+	int end = 10;
+	int resultFor = test_for(start,end);
+	printf("Result: %d\n", resultFor);
 	return 0;
 }
