@@ -36,3 +36,16 @@ func.func @test_if(%cond: !primitive.bool, %res: !primitive.int<32>) -> !primiti
   }
   return %2 : !primitive.int<32>
 }
+
+// CHECK: 9
+func.func @test_for(%start: !primitive.int<32>,%end: !primitive.int<32>) -> !primitive.int<32>{ // start = 1, end = 10 
+  %step = primitive.constant 1 : 32
+  %sum_0 = primitive.constant 0 : 32
+  %0 = primitive.for %1 = %start to %end step %step 
+		iter_args(%sum_iter = %sum_0) -> (!primitive.int<32>){
+	  %val = primitive.add %sum_iter, %step: !primitive.int<32>
+	  primitive.yield %val: !primitive.int<32>
+  }
+
+  return %0 : !primitive.int<32>
+}

@@ -4,6 +4,8 @@
 #include "include/ToyLang/Conversions/Primitive/PrimitiveToStandard.h"
 #include "include/ToyLang/Passes/Primitive/Passes.h"
 #include "include/ToyLang/Passes/Primitive/PrintPass.h"
+#include "mlir/Conversion/ControlFlowToLLVM/ControlFlowToLLVM.h"
+#include "mlir/Conversion/SCFToControlFlow/SCFToControlFlow.h"
 #include "mlir/Dialect/Bufferization/IR/BufferizableOpInterface.h"
 #include "mlir/Dialect/Bufferization/Transforms/Passes.h"
 #include "mlir/Dialect/Tensor/Transforms/Passes.h"
@@ -25,6 +27,7 @@ void arraysToStandardPipelineBuilder(mlir::OpPassManager &manager) {
 }
 
 void arraysToLLVMPipelineBuilder(mlir::OpPassManager &manager) {
+  manager.addPass(mlir::createCanonicalizerPass());
   manager.addPass(mlir::toylang::arrays::createArrToStandard());
   manager.addPass(mlir::toylang::primitive::createPrimToStandard());
   manager.addPass(mlir::createCanonicalizerPass());
@@ -72,8 +75,11 @@ void arraysToLLVMPipelineBuilder(mlir::OpPassManager &manager) {
 
 
 void primitiveToLLVMPipelineBuilder(mlir::OpPassManager &manager){
+	manager.addPass(mlir::createCanonicalizerPass());
 	manager.addPass(mlir::toylang::primitive::createPrimToStandard());
 	manager.addPass(mlir::createCanonicalizerPass());
+	manager.addPass(mlir::createConvertSCFToCFPass());
+	manager.addPass(mlir::createConvertControlFlowToLLVMPass());
 	manager.addPass(mlir::createConvertFuncToLLVMPass());
 	manager.addPass(mlir::createArithToLLVMConversionPass());
 }

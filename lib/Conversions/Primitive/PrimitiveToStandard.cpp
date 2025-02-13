@@ -96,6 +96,30 @@ struct ConvertIf : public mlir::OpConversionPattern<IfOp>{
     	return success();
 	}
 };
+
+struct ConvertFor : public mlir::OpConversionPattern<ForOp>{
+	ConvertFor(mlir::TypeConverter& type_convertor, MLIRContext* context) 
+		: mlir::OpConversionPattern<ForOp>(type_convertor,context){}
+
+	LogicalResult matchAndRewrite(ForOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		scf::ForOp forOp = rewriter.create<scf::ForOp>(op.getLoc(),
+				adaptor.getLowerBound(),adaptor.getHigherBound(),adaptor.getStep(),
+				adaptor.getInitArgs());
+
+		if (failed(rewriter.convertRegionTypes(&op.getRegion(), *getTypeConverter())))
+			return failure();
+
+		rewriter.eraseBlock(&forOp.getRegion().front());
+    	rewriter.inlineRegionBefore(op.getRegion(), forOp.getRegion(),
+    	                            forOp.getRegion().begin());
+
+
+		rewriter.replaceOp(op.getOperation(),forOp.getOperation());
+		return success();
+	}
+};
+
+
 struct ConvertYield : public mlir::OpConversionPattern<YieldOp>{
 	ConvertYield(mlir::TypeConverter& type_convertor, MLIRContext* context) 
 		: mlir::OpConversionPattern<YieldOp>(type_convertor,context){}
@@ -158,6 +182,7 @@ struct PrimToStandard : impl::PrimToStandardBase<PrimToStandard> {
 	ConvertMult,
 	ConvertDiv,
 	ConvertIf,
+	ConvertFor,
     ConvertYield,
 	ConvertToStandard,
 	ConvertFromStandard,
