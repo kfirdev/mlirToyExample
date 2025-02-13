@@ -9,7 +9,9 @@ func.func @test_for(%addon: !primitive.int<32>) -> !primitive.int<32>{
 		iter_args(%sum_iter = %sum_0) -> (!primitive.int<32>){
 
 	  %c = primitive.constant 3 : 32
-	  %val = primitive.add %sum_iter, %c: !primitive.int<32>
+	  %h = primitive.add %c, %start : !primitive.int<32>
+	  %l = primitive.add %h, %addon : !primitive.int<32>
+	  %val = primitive.add %sum_iter, %l : !primitive.int<32>
 
 	  primitive.yield %val: !primitive.int<32>
   }

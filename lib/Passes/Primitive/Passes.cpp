@@ -112,15 +112,36 @@ struct ForHoistConst : public OpRewritePattern<ForOp> {
 
   LogicalResult matchAndRewrite(ForOp forOp,PatternRewriter &rewriter) const final{
 
-  	IRMapping mapping;
-	  for (auto& op: forOp.getRegion().front().without_terminator()){
-		  if (mlir::dyn_cast<ConstantOp>(op)){
-			  auto new_op = rewriter.clone(op,mapping);
-			  rewriter.replaceOp(&op,new_op->getResults());
+	SmallVector<Operation*, 4> constOps;
+	
+	//The crash is happening because you are modifying (replacing) operations 
+	//while iterating over the block’s op list directly. When you call rewriter.replaceOp()
+	//inside the range-based for loop, you invalidate the iterator for that block
+	bool all_const;
+    for (Operation &op : forOp.getRegion().front().without_terminator()) {
+	  all_const = true;
+	  for (auto operand: op.getOperands()){
+		  if (operand.getParentRegion() == &forOp.getRegion()){
+			  all_const = false; 
 		  }
 	  }
+      if (dyn_cast<ConstantOp>(op) || all_const)
+        constOps.push_back(&op);
+    }
+    // If no constants, nothing to do.
+    if (constOps.empty())
+      return failure();
 
-	  return success();
+    // Hoist each constant out of the loop.
+    for (Operation *op : constOps) {
+      // Clone the op.
+      Operation *cloned = rewriter.clone(*op);
+      // Insert the clone before the loop op.
+      cloned->moveBefore(forOp);
+      // Replace uses of the op inside the loop with the cloned op's results.
+      rewriter.replaceOp(op, cloned->getResults());
+    }
+    return success();
   }
 };
 
@@ -128,11 +149,11 @@ void HoistConstPass::runOnOperation() {
 	mlir::RewritePatternSet patterns(&getContext());
 	patterns.add<ForHoistConst>(patterns.getContext());
 	mlir::GreedyRewriteConfig config;
-	//config.cseConstants = false;
-	//config.fold = false;
-	//config.maxIterations = 1;
-	//config.enableRegionSimplification = GreedySimplifyRegionLevel::Disabled;
-	//config.strictMode = GreedyRewriteStrictness::ExistingOps;
+	config.cseConstants = false;
+	config.fold = false;
+	config.maxIterations = 1;
+	config.enableRegionSimplification = GreedySimplifyRegionLevel::Disabled;
+	config.strictMode = GreedyRewriteStrictness::ExistingOps;
 	(void)applyPatternsGreedily(getOperation(), std::move(patterns), config);
 }
 
