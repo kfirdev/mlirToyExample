@@ -53,3 +53,6 @@ regions attached to the op can be speculated.
 
 NoRegionArguments - This trait provides a verifier for ops that are expecting their regions to
 not have any arguments 
+
+HasParent - This class provides a verifier for ops that are expecting their parent to be one of the given parent ops. 
+for example using HasParent<"FuncOp"> meaning this op has to exist in a region owned by the Func op

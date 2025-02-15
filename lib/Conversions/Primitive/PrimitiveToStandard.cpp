@@ -131,6 +131,30 @@ struct ConvertYield : public mlir::OpConversionPattern<YieldOp>{
 	}
 };
 
+struct ConvertFunc : public mlir::OpConversionPattern<FuncOp>{
+	ConvertFunc(mlir::TypeConverter& type_convertor, MLIRContext* context) 
+		: mlir::OpConversionPattern<FuncOp>(type_convertor,context){}
+
+	LogicalResult matchAndRewrite(FuncOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		auto func = rewriter.create<mlir::func::FuncOp>(op.getLoc(), op.getName(),
+                                                    op.getFunctionType());
+		rewriter.inlineRegionBefore(op.getRegion(), func.getBody(), func.end());
+		rewriter.eraseOp(op);
+		return llvm::success();
+	}
+};
+
+struct ConvertReturn : public mlir::OpConversionPattern<ReturnOp>{
+	ConvertReturn(mlir::TypeConverter& type_convertor, MLIRContext* context) 
+		: mlir::OpConversionPattern<ReturnOp>(type_convertor,context){}
+
+	LogicalResult matchAndRewrite(ReturnOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		func::ReturnOp returnOp = rewriter.create<func::ReturnOp>(op.getLoc(),adaptor.getOperands());
+		rewriter.replaceOp(op.getOperation(), returnOp.getOperation());
+		return llvm::success();
+	}
+};
+
 struct ConvertConstant : public mlir::OpConversionPattern<ConstantOp>{
 	ConvertConstant(mlir::TypeConverter& type_convertor, MLIRContext* context) 
 		: mlir::OpConversionPattern<ConstantOp>(type_convertor,context){}
@@ -184,6 +208,8 @@ struct PrimToStandard : impl::PrimToStandardBase<PrimToStandard> {
 	ConvertIf,
 	ConvertFor,
     ConvertYield,
+	ConvertFunc,
+	ConvertReturn,
 	ConvertToStandard,
 	ConvertFromStandard,
 	ConvertConstant
