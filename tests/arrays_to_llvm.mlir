@@ -1,4 +1,4 @@
-// RUN: ../build/src/toy-opt --arrays-to-llvm %s | mlir-translate --mlir-to-llvmir | llc -filetype=obj > %t 
+// RUN: ../build/src/toy-opt --toy-to-llvm %s | mlir-translate --mlir-to-llvmir | llc -filetype=obj > %t 
 // RUN: clang++ -c arrays_to_llvm_main.cpp
 // RUN: clang++ arrays_to_llvm_main.o %t -L/home/kfirby/personal/cpp_projects/llvm_project/llvm-project/build/lib/ -lmlir_c_runner_utils -o b.out
 // RUN: ./b.out | FileCheck %s

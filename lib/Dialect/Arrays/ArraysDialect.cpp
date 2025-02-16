@@ -167,4 +167,17 @@ mlir::Operation *ArraysDialect::materializeConstant(::mlir::OpBuilder &builder,
 
 }
 
+llvm::LogicalResult CastOp::verify(){
+	if (getSource().getType().getType() != getResult().getType().getType()){
+		 return emitOpError() << "inner type must match";
+	}
+	if (getSource().getType().getLength() == 0 || getResult().getType().getLength() == 0){
+		return success();
+	}
+	if (getSource().getType().getLength() >  getResult().getType().getLength()){
+		 return emitOpError() << "cannot make array smaller";
+	}
+	return success();
+}
+
 } // namespace mlir::toylang::arrays
