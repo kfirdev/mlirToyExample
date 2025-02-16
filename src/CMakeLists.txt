@@ -11,6 +11,7 @@ set (LIBS
 	MLIRArr
 	MLIRArrLowerPass
 	MLIRArrPasses
+	MLIRAllLowerPass
 )
 
 add_llvm_executable(toy-opt main.cpp)

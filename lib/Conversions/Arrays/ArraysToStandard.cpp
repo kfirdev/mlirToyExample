@@ -80,6 +80,19 @@ struct ConvertExtract : public mlir::OpConversionPattern<ExtractOp>{
 		return llvm::success();
 	}
 };
+struct ConvertCast : public mlir::OpConversionPattern<CastOp>{
+	ConvertCast(mlir::TypeConverter& type_convertor, MLIRContext* context) 
+		: mlir::OpConversionPattern<CastOp>(type_convertor,context){}
+
+	LogicalResult matchAndRewrite(CastOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+
+		tensor::CastOp castOp = rewriter.create<tensor::CastOp>(
+				op.getLoc(),op.getDest().getType(),adaptor.getSource());
+
+		rewriter.replaceOp(op.getOperation(), castOp.getOperation());
+		return llvm::success();
+	}
+};
 
 struct ConvertConstant : public mlir::OpConversionPattern<ConstantOp>{
 	ConvertConstant(mlir::TypeConverter& type_convertor, MLIRContext* context) 
@@ -115,7 +128,7 @@ struct ArrToStandard : impl::ArrToStandardBase<ArrToStandard> {
 
 	mlir::RewritePatternSet patterns(context);
 	ArraysToStandardTypeConverter type_convertor(context);
-	patterns.add<ConvertConstant,ConvertInsert,ConvertConcat,ConvertExtract>(type_convertor,context);
+	patterns.add<ConvertConstant,ConvertInsert,ConvertConcat,ConvertExtract,ConvertCast>(type_convertor,context);
 
 	populateFunctionOpInterfaceTypeConversionPattern<mlir::func::FuncOp>(
         patterns, type_convertor);

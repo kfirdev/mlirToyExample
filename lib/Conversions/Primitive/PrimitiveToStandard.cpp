@@ -154,7 +154,18 @@ struct ConvertReturn : public mlir::OpConversionPattern<ReturnOp>{
 		return llvm::success();
 	}
 };
+struct ConvertGenericCall : public mlir::OpConversionPattern<GenericCallOp>{
+	ConvertGenericCall(mlir::TypeConverter& type_convertor, MLIRContext* context) 
+		: mlir::OpConversionPattern<GenericCallOp>(type_convertor,context){}
 
+	LogicalResult matchAndRewrite(GenericCallOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
+		mlir::func::CallOp callOp = rewriter.create<mlir::func::CallOp>(
+				op.getLoc(), op.getCallee(), 
+				op.getResult().getType(), op.getOperands());
+		rewriter.replaceOp(op.getOperation(),callOp.getOperation());
+		return llvm::success();
+	}
+};
 struct ConvertConstant : public mlir::OpConversionPattern<ConstantOp>{
 	ConvertConstant(mlir::TypeConverter& type_convertor, MLIRContext* context) 
 		: mlir::OpConversionPattern<ConstantOp>(type_convertor,context){}
@@ -209,6 +220,7 @@ struct PrimToStandard : impl::PrimToStandardBase<PrimToStandard> {
 	ConvertFor,
     ConvertYield,
 	ConvertFunc,
+	ConvertGenericCall,
 	ConvertReturn,
 	ConvertToStandard,
 	ConvertFromStandard,

@@ -259,5 +259,89 @@ void FuncOp::build(mlir::OpBuilder &builder, mlir::OperationState &state,
   buildWithEntryBlock(builder, state, name, type, attrs, type.getInputs());
 }
 
+llvm::LogicalResult ReturnOp::verify() {
+  // We know that the parent operation is a function, because of the 'HasParent'
+  // trait attached to the operation definition.
+  auto function = cast<FuncOp>((*this)->getParentOp());
+
+  /// ReturnOps can only have a single optional operand.
+  if (getNumOperands() > 1)
+    return emitOpError() << "expects at most 1 return operand";
+
+  // The operand number and types must match the function signature.
+  const auto &results = function.getFunctionType().getResults();
+  if (getNumOperands() != results.size())
+    return emitOpError() << "does not return the same number of values ("
+                         << getNumOperands() << ") as the enclosing function ("
+                         << results.size() << ")";
+
+  auto inputType = *operand_type_begin();
+  auto resultType = results.front();
+
+  // Check that the result type of the function matches the operand type.
+  if (inputType == resultType || llvm::isa<mlir::UnrankedTensorType>(inputType) ||
+      llvm::isa<mlir::UnrankedTensorType>(resultType))
+    return mlir::success();
+
+  return emitError() << "type of return operand (" << inputType
+                     << ") doesn't match function result type (" << resultType
+                     << ")";
+}
+
+LogicalResult GenericCallOp::verifySymbolUses(SymbolTableCollection &symbolTable) {
+  // Check that the callee attribute was specified.
+  auto fnAttr = (*this)->getAttrOfType<FlatSymbolRefAttr>("callee");
+  if (!fnAttr)
+    return emitOpError("requires a 'callee' symbol reference attribute");
+  FuncOp fn = symbolTable.lookupNearestSymbolFrom<FuncOp>(*this, fnAttr);
+  if (!fn)
+    return emitOpError() << "'" << fnAttr.getValue()
+                         << "' does not reference a valid function";
+
+  // Verify that the operand and result types match the callee.
+  auto fnType = fn.getFunctionType();
+  if (fnType.getNumInputs() != getNumOperands())
+    return emitOpError("incorrect number of operands for callee");
+
+  for (unsigned i = 0, e = fnType.getNumInputs(); i != e; ++i)
+    if (getOperand(i).getType() != fnType.getInput(i))
+      return emitOpError("operand type mismatch: expected operand type ")
+             << fnType.getInput(i) << ", but provided "
+             << getOperand(i).getType() << " for operand number " << i;
+
+
+  if (getResult().getType() != fnType.getResult(0)) {
+     auto diag = emitOpError("result type mismatch at index ") << 0;
+     diag.attachNote() << "      op result types: " << getResult().getType();
+     diag.attachNote() << "function result types: " << fnType.getResults();
+     return diag;
+  }
+
+  return success();
+}
+
+/// Return the callee of the generic call operation, this is required by the
+/// call interface.
+CallInterfaceCallable GenericCallOp::getCallableForCallee() {
+  return (*this)->getAttrOfType<SymbolRefAttr>("callee");
+}
+
+/// Set the callee for the generic call operation, this is required by the call
+/// interface.
+void GenericCallOp::setCalleeFromCallable(CallInterfaceCallable callee) {
+  (*this)->setAttr("callee", mlir::cast<SymbolRefAttr>(callee));
+}
+
+/// Get the argument operands to the called function, this is required by the
+/// call interface.
+Operation::operand_range GenericCallOp::getArgOperands() { return getInputs(); }
+
+/// Get the argument operands to the called function as a mutable range, this is
+/// required by the call interface.
+MutableOperandRange GenericCallOp::getArgOperandsMutable() {
+  return getInputsMutable();
+}
+
+
 
 }// namespace mlir::toylang::primitive

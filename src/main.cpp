@@ -2,6 +2,7 @@
 #include "include/ToyLang/Dialect/Primitive/PrimitiveDialect.h"
 #include "include/ToyLang/Dialect/Arrays/ArraysDialect.h"
 #include "include/ToyLang/Conversions/Primitive/PrimitiveToStandard.h"
+#include "include/ToyLang/Conversions/General/AllToStandard.h"
 #include "include/ToyLang/Passes/Primitive/Passes.h"
 #include "include/ToyLang/Passes/Primitive/PrintPass.h"
 #include "mlir/Conversion/ControlFlowToLLVM/ControlFlowToLLVM.h"
@@ -84,6 +85,54 @@ void primitiveToLLVMPipelineBuilder(mlir::OpPassManager &manager){
 	manager.addPass(mlir::createArithToLLVMConversionPass());
 }
 
+void ToyToLLVMPipelineBuilder(mlir::OpPassManager &manager) {
+  manager.addPass(mlir::createCanonicalizerPass());
+  manager.addPass(mlir::toylang::createAllToStandard());
+  manager.addPass(mlir::createCanonicalizerPass());
+
+  manager.addPass(mlir::createConvertSCFToCFPass());
+  manager.addPass(mlir::tosa::createTosaToTensor());
+  manager.addPass(mlir::affine::createSimplifyAffineStructuresPass());
+  manager.addPass(mlir::createLowerAffinePass());
+
+  manager.addPass(mlir::bufferization::createEmptyTensorToAllocTensorPass());
+  mlir::bufferization::OneShotBufferizationOptions bufferizationOptions;
+  bufferizationOptions.bufferizeFunctionBoundaries = true;
+
+  bufferizationOptions.unknownTypeConverterFn = [=](
+		  mlir::Value value, mlir::Attribute memorySpace,
+		  const mlir::bufferization::BufferizationOptions &options) {
+		auto tensorType = llvm::cast<mlir::TensorType>(value.getType());
+      return mlir::bufferization::getMemRefTypeWithStaticIdentityLayout(tensorType,
+                                                                  memorySpace);
+  };
+
+  // *SUPER IMPORTANT* this makes the memref not be so dynamic which then makes
+  // the lowering not use the memrefCopy function this is very good
+  bufferizationOptions.setFunctionBoundaryTypeConversion(mlir::bufferization::LayoutMapOption::IdentityLayoutMap);
+
+  manager.addPass(mlir::bufferization::createOneShotBufferizePass(bufferizationOptions));
+  mlir::bufferization::BufferDeallocationPipelineOptions deallocationOptions;
+  mlir::bufferization::buildBufferDeallocationPipeline(manager, deallocationOptions);
+  manager.addPass(mlir::bufferization::createPromoteBuffersToStackPass());
+
+  manager.addPass(mlir::memref::createExpandStridedMetadataPass());
+  manager.addPass(mlir::createBufferizationToMemRefPass());
+
+  manager.addPass(mlir::createArithToLLVMConversionPass());
+  manager.addPass(mlir::createConvertIndexToLLVMPass());
+  manager.addPass(mlir::createConvertControlFlowToLLVMPass());
+  manager.addPass(mlir::createConvertFuncToLLVMPass());
+  manager.addPass(mlir::createReconcileUnrealizedCastsPass());
+  manager.addPass(mlir::createFinalizeMemRefToLLVMConversionPass());
+
+  // Cleanup passes.
+  manager.addPass(mlir::createCanonicalizerPass());
+  manager.addPass(mlir::createSCCPPass());
+  manager.addPass(mlir::createCSEPass());
+  manager.addPass(mlir::createSymbolDCEPass());
+}
+
 int main(int argc, char **argv) {
 	mlir::DialectRegistry registry;
 	registry.insert<mlir::toylang::primitive::PrimitiveDialect>();
@@ -94,17 +143,24 @@ int main(int argc, char **argv) {
 	mlir::PassRegistration<mlir::toylang::primitive::HoistConstPass>();
 	mlir::toylang::primitive::passes::registerPrintPass();
 	mlir::toylang::primitive::registerPrimToStandardPass();
+	mlir::toylang::registerAllToStandardPass();
 	//mlir::toylang::arrays::registerArrToStandardPass();
 	mlir::toylang::arrays::passes::registerConcatReplacePass();
 	
 	mlir::PassPipelineRegistration<>("primitive-to-llvm",
 			"Run passes to lower primitive dialect to llvm",
 			primitiveToLLVMPipelineBuilder);
+
 	mlir::PassPipelineRegistration<>("arrays-to-llvm",
-			"Run passes to lower primitive dialect to llvm",
+			"Run passes to lower arrays dialect to llvm",
 			arraysToLLVMPipelineBuilder);
+
+	mlir::PassPipelineRegistration<>("toy-to-llvm",
+			"Run passes to lower all dialects in toylang to llvm",
+			ToyToLLVMPipelineBuilder);
+
 	mlir::PassPipelineRegistration<>("arrays-to-standard",
-			"Run passes to lower primitive dialect to llvm",
+			"Run passes to lower arrays dialect to standard",
 			arraysToStandardPipelineBuilder);
 
 	return mlir::asMainReturnCode(

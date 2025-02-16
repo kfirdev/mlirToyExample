@@ -33,3 +33,18 @@ primitive.func @test_for() -> !primitive.int<32>{
 
   primitive.return %0 : !primitive.int<32>
 }
+
+primitive.func @dyn_func(%arg0: !arrays.array<0,!primitive.int<32>>, %arg1: !arrays.array<0,!primitive.int<32>>) -> !arrays.array<0,!primitive.int<32>> {
+  %0 = arrays.concat %arg0, %arg1 : (!arrays.array<0,!primitive.int<32>>, !arrays.array<0,!primitive.int<32>>)
+  primitive.return %0 : !arrays.array<0,!primitive.int<32>>
+}
+
+primitive.func @gen_call() -> !arrays.array<0,!primitive.int<32>>{
+	%0 = arrays.constant [1,2,3]  : !arrays.array<3,!primitive.int<32>>
+	%1 = arrays.constant [4,5,6]  : !arrays.array<3,!primitive.int<32>>
+	%2 = arrays.cast %0 : !arrays.array<3,!primitive.int<32>> to !arrays.array<0,!primitive.int<32>>
+	%3 = arrays.cast %1 : !arrays.array<3,!primitive.int<32>> to !arrays.array<0,!primitive.int<32>>
+	%4 = primitive.generic_call @dyn_func(%2,%3)
+		: (!arrays.array<0,!primitive.int<32>>,!arrays.array<0,!primitive.int<32>>) -> !arrays.array<0,!primitive.int<32>>
+	primitive.return %4 : !arrays.array<0,!primitive.int<32>>
+}

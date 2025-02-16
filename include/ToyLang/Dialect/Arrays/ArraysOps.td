@@ -5,6 +5,7 @@ include "ArraysDialect.td"
 include "ArraysAttr.td"
 include "ArraysType.td"
 include "../Primitive/PrimitiveInterfaces.td"
+include "mlir/Interfaces/CastInterfaces.td"
 include "mlir/IR/OpBase.td"
 include "mlir/IR/BuiltinTypes.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
@@ -42,11 +43,20 @@ def Arr_InsertOp : Op<Arrays_Dialect,"insert",[
 	let assemblyFormat = "$scalar `into` $dest `[` $indices `]` attr-dict `:` type($dest)";
 	let arguments = (ins Builtin_Index:$indices, PrimitiveTypeInterface:$scalar,Arr_ArrType:$dest);
 	let results = (outs Arr_ArrType:$result);
-	let summary = "extract a value from a given index";
+	let summary = "insert a value at a given index";
 	//let hasVerifier = 1;
 	let hasFolder = 1;
 }
 
+def Arr_CastOp : Op<Arrays_Dialect,"cast",[Pure]> {
+	let assemblyFormat = "$source attr-dict `:` type($source) `to` type($dest)";
+	let summary = "cast to another shape";
+
+	let arguments = (ins Arr_ArrType:$source);
+  	let results = (outs Arr_ArrType:$dest);
+
+	let hasVerifier = 1;
+}
 def Attr_ConstantOp : Op<Arrays_Dialect, "constant", [Pure, ConstantLike]> {
 	let	summary = "Define a constnat int";
 	let arguments = (ins Arr_ArrAttr:$value);

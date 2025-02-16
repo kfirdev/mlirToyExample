@@ -4,6 +4,7 @@
 include "PrimitiveDialect.td"
 include "PrimitiveTypes.td"
 include "PrimitiveAttr.td"
+//include "../Arrays/ArraysType.td"
 include "mlir/IR/OpBase.td"
 include "mlir/Interfaces/LoopLikeInterface.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
@@ -168,7 +169,7 @@ def ReturnOp : Op<Primitive_Dialect,"return", [Pure, Terminator,HasParent<"FuncO
 
   // The return operation takes an optional input operand to return. This
   // value must match the return type of the enclosing function.
-  let arguments = (ins Variadic<PrimitiveTypeInterface>:$input);
+  let arguments = (ins Variadic<AnyType>:$input);
 
   // The return operation only emits the input in the format if it is present.
   let assemblyFormat = "($input^ `:` type($input))? attr-dict ";
@@ -184,7 +185,39 @@ def ReturnOp : Op<Primitive_Dialect,"return", [Pure, Terminator,HasParent<"FuncO
   }];
 
   // Invoke a static verify method to verify this return operation.
-  //let hasVerifier = 1;
+  let hasVerifier = 1;
+}
+
+def GenericCallOp : Op<Primitive_Dialect,"generic_call",[
+	DeclareOpInterfaceMethods<CallOpInterface>,
+	DeclareOpInterfaceMethods<SymbolUserOpInterface>]> {
+  let summary = "generic call operation";
+  let description = [{
+    Generic calls represent calls to a user defined function that needs to
+    be specialized for the shape of its arguments. The callee name is attached
+    as a symbol reference via an attribute. The arguments list must match the
+    arguments expected by the callee. For example:
+
+    ```mlir
+     %4 = primitive.generic_call @my_func(%1, %3)
+           : (tensor<2x3xf64>, tensor<2x3xf64>) -> tensor<*xf64>
+    ```
+
+    This is only valid if a function named "my_func" exists and takes two
+    arguments.
+  }];
+
+  let arguments = (ins FlatSymbolRefAttr:$callee, Variadic<AnyType>:$inputs);
+  let results = (outs AnyType);
+
+  let assemblyFormat = [{
+    $callee `(` $inputs `)` attr-dict `:` functional-type($inputs, results)
+  }];
+
+  // Add custom build methods for the generic call operation.
+  //let builders = [
+  //  OpBuilder<(ins "StringRef":$callee, "ArrayRef<Value>":$arguments)>
+  //];
 }
 
 
