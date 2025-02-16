@@ -1,4 +1,4 @@
-// RUN: ../build/src/toy-opt --primitive-to-llvm %s | mlir-translate --mlir-to-llvmir | llc -filetype=obj > %t 
+// RUN: ../build/src/toy-opt --toy-to-llvm %s | mlir-translate --mlir-to-llvmir | llc -filetype=obj > %t 
 // RUN: clang -c primitive_to_llvm_main.c 
 // RUN: clang primitive_to_llvm_main.o %t -o a.out
 // RUN: ./a.out | FileCheck %s

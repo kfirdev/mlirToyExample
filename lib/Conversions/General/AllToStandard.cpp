@@ -1,6 +1,5 @@
-#include "include/ToyLang/Conversions/Arrays/ArraysToStandard.h"
 #include "ToyLang/Dialect/Primitive/PrimitiveOps.h"
-#include "include/ToyLang/Conversions/Primitive/PrimitiveToStandard.h"
+#include "include/ToyLang/Conversions/General/AllToStandard.h"
 #include "mlir/Dialect/Func/Transforms/FuncConversions.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/Tensor/Transforms/Transforms.h"
@@ -47,11 +46,11 @@ struct ConvertInsert : public mlir::OpConversionPattern<arrays::InsertOp>{
 
 	LogicalResult matchAndRewrite(arrays::InsertOp op,OpAdaptor adaptor, ConversionPatternRewriter &rewriter) const {
 
-		//auto convertedScalar = rewriter.create<primitive::ToStandardOp>(
-		//		op.getLoc(), op.getScalar().getType().toStandard(), adaptor.getScalar());
+		auto convertedScalar = rewriter.create<primitive::ToStandardOp>(
+				op.getLoc(), op.getScalar().getType().toStandard(), adaptor.getScalar());
 
 		tensor::InsertOp insertOp = rewriter.create<tensor::InsertOp>(
-				op.getLoc(),op.getScalar(),adaptor.getDest(),adaptor.getIndices());
+				op.getLoc(),convertedScalar.getResult(),adaptor.getDest(),adaptor.getIndices());
 
 		rewriter.replaceOp(op.getOperation(), insertOp.getOperation());
 		return llvm::success();

@@ -1,4 +1,4 @@
-// RUN: ../build/src/toy-opt --primitive-to-standard %s > %t
+// RUN: ../build/src/toy-opt --toy-to-standard %s > %t
 // RUN: FileCheck %s < %t
 
 // CHECK-LABEL: @test_simple

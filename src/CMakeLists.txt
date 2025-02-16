@@ -7,9 +7,7 @@ set (LIBS
 	MLIROptLib
 	MLIRPrinPass
 	MLIRPrim
-	MLIRPrimLowerPass
 	MLIRArr
-	MLIRArrLowerPass
 	MLIRArrPasses
 	MLIRAllLowerPass
 )
