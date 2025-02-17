@@ -11,3 +11,8 @@ mlir_tablegen(ArraysOps.cpp.inc -gen-op-defs -dialect arrays)
 mlir_tablegen(ArraysAttr.h.inc -gen-attrdef-decls --attrdefs-dialect arrays)
 mlir_tablegen(ArraysAttr.cpp.inc -gen-attrdef-defs --attrdefs-dialect arrays)
 add_public_tablegen_target(MLIRArrDialectIncGen)
+
+set(LLVM_TARGET_DEFINITIONS ArraysInterfaces.td)
+mlir_tablegen(ArraysInterfaces.h.inc -gen-op-interface-decls)
+mlir_tablegen(ArraysInterfaces.cpp.inc -gen-op-interface-defs)
+add_public_tablegen_target(MLIRArrInterfaceIncGen)

@@ -3,8 +3,10 @@
 #include "ToyLang/Dialect/Primitive/PrimitiveDialect.h"
 #include "ToyLang/Dialect/Primitive/PrimitiveAttr.h"
 #include "ToyLang/Dialect/Primitive/PrimitiveOps.h"
+#include "ToyLang/Dialect/Arrays/ArraysOps.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveOps.h"
 #include "include/ToyLang/Dialect/Primitive/PrimitiveInterfaces.h"
+#include "include/ToyLang/Dialect/Arrays/ArraysInterfaces.h"
 #include "mlir/AsmParser/AsmParserState.h"
 #include "mlir/IR/IRMapping.h"
 #include "mlir/Transforms/GreedyPatternRewriteDriver.h"
@@ -155,6 +157,35 @@ void HoistConstPass::runOnOperation() {
 	config.enableRegionSimplification = GreedySimplifyRegionLevel::Disabled;
 	config.strictMode = GreedyRewriteStrictness::ExistingOps;
 	(void)applyPatternsGreedily(getOperation(), std::move(patterns), config);
+}
+
+//===----------------------------------------------------------------------===//
+// Infer shapes 
+//===----------------------------------------------------------------------===//
+
+void ShapeInfrencePass::runOnOperation() {
+  FuncOp function = getOperation();
+    // Walk all operations in the function.
+    function.walk([&](Operation *op) {
+      // (1) For cast operations:
+      if (auto castOp = dyn_cast<arrays::CastOp>(op)) {
+        // Get the source and destination array types.
+		if (castOp.getSource().getType().getLength() != 0){
+			castOp.replaceAllUsesWith(castOp.getOperand());
+			castOp.erase();
+		}
+		//else if (castOp.getDest().getType().getLength() != 0){
+		//	castOp.replaceAllUsesWith(castOp.getResult());
+		//}
+		//else{
+		//	return;
+		//}
+	  } 
+	  else if (auto shapeOp = dyn_cast<arrays::ShapeInference>(op)){
+			shapeOp.inferShapes();
+	  }
+
+  });
 }
 
 } // namespace

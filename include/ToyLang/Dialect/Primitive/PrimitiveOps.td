@@ -82,11 +82,11 @@ def Prim_ForOp : Op<Primitive_Dialect, "for", [AutomaticAllocationScope,
   Prim_IntegerType:$lowerBound, 
   Prim_IntegerType:$higherBound,
   Prim_IntegerType:$step,
-  Variadic<PrimitiveTypeInterface>:$initArgs
+  Variadic<AnyType>:$initArgs
   );
 
 
-  let results = (outs Variadic<PrimitiveTypeInterface>:$result);
+  let results = (outs Variadic<AnyType>:$result);
   let regions = (region SizedRegion<1>:$region);
 
   let extraClassDeclaration = [{
@@ -188,9 +188,7 @@ def ReturnOp : Op<Primitive_Dialect,"return", [Pure, Terminator,HasParent<"FuncO
   let hasVerifier = 1;
 }
 
-def GenericCallOp : Op<Primitive_Dialect,"generic_call",[
-	DeclareOpInterfaceMethods<CallOpInterface>,
-	DeclareOpInterfaceMethods<SymbolUserOpInterface>]> {
+def GenericCallOp : Op<Primitive_Dialect,"generic_call",[DeclareOpInterfaceMethods<CallOpInterface>]> {
   let summary = "generic call operation";
   let description = [{
     Generic calls represent calls to a user defined function that needs to
@@ -215,9 +213,9 @@ def GenericCallOp : Op<Primitive_Dialect,"generic_call",[
   }];
 
   // Add custom build methods for the generic call operation.
-  //let builders = [
-  //  OpBuilder<(ins "StringRef":$callee, "ArrayRef<Value>":$arguments)>
-  //];
+  let builders = [
+    OpBuilder<(ins "StringRef":$callee, "ArrayRef<Value>":$arguments)>
+  ];
 }
 
 

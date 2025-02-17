@@ -288,37 +288,15 @@ llvm::LogicalResult ReturnOp::verify() {
                      << ")";
 }
 
-LogicalResult GenericCallOp::verifySymbolUses(SymbolTableCollection &symbolTable) {
-  // Check that the callee attribute was specified.
-  auto fnAttr = (*this)->getAttrOfType<FlatSymbolRefAttr>("callee");
-  if (!fnAttr)
-    return emitOpError("requires a 'callee' symbol reference attribute");
-  FuncOp fn = symbolTable.lookupNearestSymbolFrom<FuncOp>(*this, fnAttr);
-  if (!fn)
-    return emitOpError() << "'" << fnAttr.getValue()
-                         << "' does not reference a valid function";
-
-  // Verify that the operand and result types match the callee.
-  auto fnType = fn.getFunctionType();
-  if (fnType.getNumInputs() != getNumOperands())
-    return emitOpError("incorrect number of operands for callee");
-
-  for (unsigned i = 0, e = fnType.getNumInputs(); i != e; ++i)
-    if (getOperand(i).getType() != fnType.getInput(i))
-      return emitOpError("operand type mismatch: expected operand type ")
-             << fnType.getInput(i) << ", but provided "
-             << getOperand(i).getType() << " for operand number " << i;
-
-
-  if (getResult().getType() != fnType.getResult(0)) {
-     auto diag = emitOpError("result type mismatch at index ") << 0;
-     diag.attachNote() << "      op result types: " << getResult().getType();
-     diag.attachNote() << "function result types: " << fnType.getResults();
-     return diag;
-  }
-
-  return success();
+void GenericCallOp::build(mlir::OpBuilder &builder, mlir::OperationState &state,
+                          StringRef callee, ArrayRef<mlir::Value> arguments) {
+  // Generic call always returns an unranked Tensor initially.
+  state.addTypes(UnrankedTensorType::get(builder.getF64Type()));
+  state.addOperands(arguments);
+  state.addAttribute("callee",
+                     mlir::SymbolRefAttr::get(builder.getContext(), callee));
 }
+
 
 /// Return the callee of the generic call operation, this is required by the
 /// call interface.

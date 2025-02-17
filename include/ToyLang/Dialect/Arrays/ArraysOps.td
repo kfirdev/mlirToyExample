@@ -4,6 +4,7 @@
 include "ArraysDialect.td"
 include "ArraysAttr.td"
 include "ArraysType.td"
+include "ArraysInterfaces.td"
 include "../Primitive/PrimitiveInterfaces.td"
 include "mlir/Interfaces/CastInterfaces.td"
 include "mlir/IR/OpBase.td"
@@ -11,7 +12,10 @@ include "mlir/IR/BuiltinTypes.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 
-def Arr_ConcatOp : Op<Arrays_Dialect,"concat",[Pure,DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+def Arr_ConcatOp : Op<Arrays_Dialect,"concat",[Pure,
+		DeclareOpInterfaceMethods<InferTypeOpInterface>,
+		DeclareOpInterfaceMethods<ShapeInferenceOpInterface>]> {
+
 	let assemblyFormat = "$lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)`";
 	let arguments = (ins Arr_ArrType:$lhs, Arr_ArrType:$rhs);
 	let results = (outs Arr_ArrType:$output);
@@ -38,8 +42,8 @@ def Arr_InsertOp : Op<Arrays_Dialect,"insert",[
                    "$_self">,
 				   TypesMatchWith<"result type matches type of dest",
                    "dest", "scalar",
-                   "mlir::cast<ArrayType>($_self).getType()">
-				   ]> {
+                   "mlir::cast<ArrayType>($_self).getType()">,
+				   DeclareOpInterfaceMethods<ShapeInferenceOpInterface>]> {
 	let assemblyFormat = "$scalar `into` $dest `[` $indices `]` attr-dict `:` type($dest)";
 	let arguments = (ins Builtin_Index:$indices, PrimitiveTypeInterface:$scalar,Arr_ArrType:$dest);
 	let results = (outs Arr_ArrType:$result);
