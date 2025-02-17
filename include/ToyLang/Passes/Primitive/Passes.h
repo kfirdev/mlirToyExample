@@ -29,6 +29,16 @@ struct HoistConstPass : PassWrapper<HoistConstPass,OperationPass<>>{
   	}
 };
 
+struct ShapeInfrencePass : PassWrapper<ShapeInfrencePass,OperationPass<primitive::FuncOp>>{
+	void runOnOperation() override;
+	StringRef getArgument() const final { return "infer-shape"; }
+
+  	StringRef getDescription() const final {
+  	  return "Infer shapes";
+  	}
+};
+
+
 namespace passes{
 
 #define GEN_PASS_REGISTRATION 

@@ -39,12 +39,20 @@ primitive.func @dyn_func(%arg0: !arrays.array<0,!primitive.int<32>>, %arg1: !arr
   primitive.return %0 : !arrays.array<0,!primitive.int<32>>
 }
 
-primitive.func @gen_call() -> !arrays.array<0,!primitive.int<32>>{
+primitive.func @gen_call() -> !arrays.array<6,!primitive.int<32>>{
 	%0 = arrays.constant [1,2,3]  : !arrays.array<3,!primitive.int<32>>
 	%1 = arrays.constant [4,5,6]  : !arrays.array<3,!primitive.int<32>>
-	%2 = arrays.cast %0 : !arrays.array<3,!primitive.int<32>> to !arrays.array<0,!primitive.int<32>>
-	%3 = arrays.cast %1 : !arrays.array<3,!primitive.int<32>> to !arrays.array<0,!primitive.int<32>>
-	%4 = primitive.generic_call @dyn_func(%2,%3)
-		: (!arrays.array<0,!primitive.int<32>>,!arrays.array<0,!primitive.int<32>>) -> !arrays.array<0,!primitive.int<32>>
-	primitive.return %4 : !arrays.array<0,!primitive.int<32>>
+	%4 = primitive.generic_call @dyn_func(%0,%1)
+		: (!arrays.array<3,!primitive.int<32>>,!arrays.array<3,!primitive.int<32>>) -> !arrays.array<6,!primitive.int<32>>
+	primitive.return %4 : !arrays.array<6,!primitive.int<32>>
+}
+
+primitive.func @add_num(%arg0: !primitive.int<32>, %arg1: !primitive.int<32>) -> !primitive.int<32> {
+  %0 = primitive.add %arg0,%arg1 : !primitive.int<32>
+  primitive.return %0 : !primitive.int<32>
+}
+primitive.func @test(%arg0: !primitive.int<32>) -> !primitive.int<32> {
+  %0 = primitive.constant 1 : 32
+  %2 = primitive.generic_call @add_num(%0,%arg0) : (!primitive.int<32>,!primitive.int<32>) -> !primitive.int<32> 
+  primitive.return %2 : !primitive.int<32>
 }

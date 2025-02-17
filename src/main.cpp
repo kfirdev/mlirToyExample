@@ -77,6 +77,9 @@ void ToyToLLVMPipelineBuilder(mlir::OpPassManager &manager) {
   manager.addPass(mlir::createCSEPass());
   manager.addPass(mlir::createSymbolDCEPass());
 }
+void primitiveInliner(mlir::OpPassManager &manager){
+	manager.addPass(mlir::createInlinerPass());
+}
 
 int main(int argc, char **argv) {
 	mlir::DialectRegistry registry;
@@ -86,6 +89,7 @@ int main(int argc, char **argv) {
 	mlir::registerAllPasses();
 	mlir::PassRegistration<mlir::toylang::primitive::FullUnrollPass>();
 	mlir::PassRegistration<mlir::toylang::primitive::HoistConstPass>();
+	mlir::PassRegistration<mlir::toylang::primitive::ShapeInfrencePass>();
 	mlir::toylang::primitive::passes::registerPrintPass();
 	mlir::toylang::registerAllToStandardPass();
 	//mlir::toylang::arrays::registerArrToStandardPass();
@@ -95,6 +99,10 @@ int main(int argc, char **argv) {
 	mlir::PassPipelineRegistration<>("toy-to-llvm",
 			"Run passes to lower all dialects in toylang to llvm",
 			ToyToLLVMPipelineBuilder);
+
+	mlir::PassPipelineRegistration<>("prim-inline",
+			"Run passes to inline all functions",
+			primitiveInliner);
 
 	return mlir::asMainReturnCode(
   	    mlir::MlirOptMain(argc, argv, "Tutorial Pass Driver", registry));
